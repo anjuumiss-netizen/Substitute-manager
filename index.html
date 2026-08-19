@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BCA Smart Timetable & Cloud Substitute Manager</title>
+<title>BCA Smart Dynamic Timetable & Cloud Manager</title>
 
-<!-- Firebase SDKs (Compat Version for Mobile & Web Standalone) -->
+<!-- Firebase SDKs (Compat Version) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -23,6 +23,7 @@
   --orange: #ff851f;
   --pink: #e73577;
   --blue: #2d79ff;
+  --danger: #ef4444;
   --card-bg: linear-gradient(145deg, #101827, #111b2b);
   --header-bg: #0b111eec;
   --side-bg: #0d1422;
@@ -46,6 +47,7 @@ body.light-theme {
   --orange: #f59e0b;
   --pink: #ec4899;
   --blue: #3b82f6;
+  --danger: #dc2626;
   --card-bg: #ffffff;
   --header-bg: #ffffffee;
   --side-bg: #f8fafc;
@@ -116,16 +118,23 @@ button { cursor: pointer; }
   gap: 5px;
 }
 
-.cloud-badge {
-  font-size: 9px;
-  padding: 4px 8px;
+.auth-btn {
+  background: var(--chip-bg);
+  border: 1px solid var(--p);
+  color: var(--text);
+  padding: 6px 12px;
   border-radius: 999px;
+  font-size: 11px;
   font-weight: 800;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
-.cloud-online { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.auth-btn.logged-in {
+  background: rgba(23, 199, 132, 0.15);
+  border-color: #10b981;
+  color: #10b981;
+}
 
 /* Layout */
 .layout { display: flex; }
@@ -133,10 +142,11 @@ button { cursor: pointer; }
   position: fixed;
   top: 68px;
   bottom: 0;
-  width: 200px;
+  width: 220px;
   background: var(--side-bg);
   border-right: 1px solid var(--line);
   padding: 16px 10px;
+  overflow-y: auto;
 }
 .nav {
   border: 0;
@@ -168,8 +178,8 @@ button { cursor: pointer; }
 .only small { display: block; color: var(--muted); font-size: 10px; line-height: 1.4; margin-top: 4px; }
 
 .main {
-  margin-left: 200px;
-  width: calc(100% - 200px);
+  margin-left: 220px;
+  width: calc(100% - 220px);
   max-width: 1400px;
   padding: 20px;
 }
@@ -196,7 +206,7 @@ button { cursor: pointer; }
 /* Stats */
 .stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 }
 .stat {
@@ -211,7 +221,6 @@ button { cursor: pointer; }
 .blue { background: linear-gradient(135deg, #2165dc, #317dff); }
 .orange { background: linear-gradient(135deg, #ed6914, #ff861e); }
 .green { background: linear-gradient(135deg, #0da76f, #18c886); }
-.pink { background: linear-gradient(135deg, #c52b63, #e73879); }
 .stat.clickable { cursor: pointer; }
 
 /* Cards & Elements */
@@ -229,6 +238,8 @@ button { cursor: pointer; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .head h2 { font-size: 14px; margin: 0; }
 .tag {
@@ -291,10 +302,10 @@ button { cursor: pointer; }
 }
 .bn { font-size: 8px; color: var(--muted); text-align: center; line-height: 1.2; margin-top: 5px; }
 
-/* Quick Actions & Grids */
+/* Quick Actions */
 .quick {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   padding: 14px;
 }
@@ -308,22 +319,6 @@ button { cursor: pointer; }
   font-weight: 700;
 }
 .quick span { display: block; font-size: 18px; margin-bottom: 4px; }
-
-.sections {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  padding: 14px;
-}
-.section {
-  background: var(--panel2);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 12px;
-}
-.section b { font-size: 11px; color: var(--p2); }
-.sl { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 8px; }
-.sl span { font-size: 10px; color: var(--muted); }
 
 /* Controls & Forms */
 .controls {
@@ -360,6 +355,23 @@ button { cursor: pointer; }
   font-weight: 800;
   padding: 10px 14px;
 }
+.danger-btn {
+  background: #ef4444;
+  color: #fff;
+  border: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: bold;
+}
+.ghost {
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+}
 
 .notify-btn-wa {
   background: #17c784;
@@ -388,8 +400,8 @@ button { cursor: pointer; }
   text-decoration: none;
 }
 
-/* Master Timetable Grid (No Cut Borders) */
-.yeartabs { display: flex; gap: 8px; padding: 14px 16px 0; }
+/* Master Timetable Grid */
+.yeartabs { display: flex; gap: 8px; padding: 14px 16px 0; overflow-x: auto; }
 .tab {
   border: 1px solid var(--line);
   background: var(--panel2);
@@ -398,6 +410,7 @@ button { cursor: pointer; }
   padding: 8px 14px;
   font-size: 11px;
   font-weight: 700;
+  white-space: nowrap;
 }
 .tab.active { background: var(--p); color: #fff; border-color: var(--p); }
 
@@ -443,16 +456,51 @@ button { cursor: pointer; }
 .edit-cell:hover { outline: 2px solid var(--p); outline-offset: -2px; }
 .edit-mark { position: absolute; top: 3px; right: 3px; font-size: 8px; opacity: 0.6; }
 
-/* Directory Table with S.No */
+/* Dynamic List Items & Directory Table */
 .dir-table { width: 100%; border-collapse: collapse; font-size: 11px; }
 .dir-table th, .dir-table td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: left; }
 .dir-table th { background: var(--table-th); color: var(--muted); font-size: 10px; }
+
+.item-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px dashed var(--line);
+}
+.item-list-row b { font-size: 12px; }
 
 /* Report Action Rows */
 .reportrow { padding: 14px 16px; border-bottom: 1px dashed var(--line); font-size: 11px; }
 .reportrow b { display: block; font-size: 12px; }
 .reportrow small { color: var(--muted); line-height: 1.4; }
 .report-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+/* Strict Privacy: Hide Admin Sections from Normal Users */
+body:not(.is-admin) .admin-only { display: none !important; }
+body.is-admin .guest-only { display: none !important; }
+
+/* Clean Auth Modal (Zero Hints) */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  place-items: center;
+  padding: 16px;
+}
+.modal-overlay.active { display: grid; }
+.modal-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 340px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 
 .bottom { display: none; }
 @media(max-width: 800px) {
@@ -466,9 +514,7 @@ button { cursor: pointer; }
   .date { display: inline-block; margin-top: 8px; }
   .stats { grid-template-columns: 1fr 1fr; }
   .stat strong { font-size: 22px; }
-  .stat:last-child { grid-column: span 2; }
   .quick { grid-template-columns: 1fr 1fr; }
-  .sections { grid-template-columns: 1fr; }
   .controls { display: block; }
   .field { margin-bottom: 8px; }
   .primary { width: 100%; }
@@ -510,26 +556,46 @@ button { cursor: pointer; }
     <div class="logo">TM</div>
     <div class="brand">
       <b>Smart Timetable</b>
-      <small>Substitute Manager • BCA Department</small>
+      <small>Cloud Dynamic Manager • Secure</small>
     </div>
   </div>
   <div class="header-actions">
-    <span class="cloud-badge cloud-online" id="cloudStatus">☁️ Cloud Connected</span>
-    <button class="theme-toggle" data-action="toggle-theme" id="themeToggleBtn">🌙 <span>Dark Mode</span></button>
+    <button class="auth-btn" id="authStatusBtn" data-action="open-auth-modal">🔐 <span>Admin Login</span></button>
+    <button class="theme-toggle" data-action="toggle-theme" id="themeToggleBtn">🌙 <span>Dark</span></button>
   </div>
 </header>
+
+<!-- SECURE ADMIN PIN MODAL (CLEAN - ZERO HINTS) -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-card">
+    <h2 style="margin:0 0 8px;font-size:16px" id="modalTitle">🔐 Admin Access</h2>
+    <p style="color:var(--muted);font-size:11px;margin:0 0 14px">Authorized personnel only. Enter Security PIN to continue.</p>
+    <div class="field" style="margin-bottom:14px">
+      <label>Security PIN</label>
+      <input type="password" id="adminPinInput" placeholder="••••" maxlength="12" style="font-size:18px;text-align:center;letter-spacing:6px">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="primary" style="flex:1" data-action="verify-pin">Unlock</button>
+      <button class="ghost" data-action="close-auth-modal">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <div class="layout">
   <aside class="side">
     <button class="nav active" data-go="dashboard"><span>⌂</span>Dashboard</button>
     <button class="nav" data-go="substitute"><span>⚡</span>Smart Substitute</button>
     <button class="nav" data-go="teacherstatus"><span>👤</span>Faculty Status</button>
-    <button class="nav" data-go="directory"><span>📇</span>Faculty Directory</button>
-    <button class="nav" data-go="timetable"><span>▦</span>Timetable</button>
-    <button class="nav" data-go="reports"><span>▥</span>Reports & Actions</button>
+    <button class="nav" data-go="timetable"><span>▦</span>Master Timetable</button>
+    
+    <!-- Admin Only Side Menus -->
+    <button class="nav admin-only" data-go="directory"><span>📇</span>Faculty Directory</button>
+    <button class="nav admin-only" data-go="academicmgmt"><span>⚙️</span>Faculty & Years Control</button>
+    <button class="nav admin-only" data-go="reports"><span>▥</span>Reports & Log</button>
+    
     <div class="only">
-      <b>🎓 BCA ONLY</b>
-      <small>2nd & 3rd Year<br>Firebase Realtime Sync Active</small>
+      <b id="sideRoleText">👁️ VIEWER MODE</b>
+      <small id="sideRoleSub">Read-Only access active.<br>Login as Admin to edit.</small>
     </div>
   </aside>
 
@@ -538,27 +604,23 @@ button { cursor: pointer; }
     <section id="dashboard" class="page active">
       <div class="hero">
         <div>
-          <h1>Welcome, Administrator 👋</h1>
-          <p>BCA Academic Timetable & Smart Cloud Substitute Control</p>
+          <h1>Welcome 👋</h1>
+          <p>Real-Time Dynamic Academic Timetable</p>
         </div>
         <div class="date" id="today"></div>
       </div>
 
       <div class="stats">
-        <div class="stat purple clickable" data-go="teacherstatus"><b>Active Faculty</b><strong id="statActiveTeachers">38</strong></div>
-        <div class="stat blue clickable" data-go="timetable"><b>Active Lectures</b><strong id="totalClasses">300</strong></div>
-        <div class="stat orange clickable" data-go="substitute"><b>Today's Absences</b><strong id="absences">0</strong></div>
-        <div class="stat green clickable" data-go="reports"><b>Substitutions</b><strong id="subCount">0</strong></div>
-        <div class="stat pink clickable" data-go="reports"><b>Pending</b><strong>0</strong></div>
+        <div class="stat purple clickable" data-go="teacherstatus"><b>Active Faculty</b><strong id="statActiveTeachers">0</strong></div>
+        <div class="stat blue clickable" data-go="timetable"><b>Active Lectures</b><strong id="totalClasses">0</strong></div>
+        <div class="stat orange clickable" data-go="substitute"><b>Absences Today</b><strong id="absences">0</strong></div>
+        <div class="stat green"><b>Substitutions</b><strong id="subCount">0</strong></div>
       </div>
 
       <div class="card">
         <div class="head">
           <h2>Active Cloud Substitutions Log</h2>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span class="tag ready">Live Sync</span>
-            <span class="tag" style="cursor:pointer" data-go="reports">Manage All →</span>
-          </div>
+          <span class="tag ready">Live Feed</span>
         </div>
         <div id="sublist"></div>
       </div>
@@ -572,26 +634,11 @@ button { cursor: pointer; }
       </div>
 
       <div class="card">
-        <div class="head"><h2>Quick Actions</h2></div>
+        <div class="head"><h2>Quick Navigation</h2></div>
         <div class="quick">
-          <button data-go="substitute"><span>⚡</span>Find Substitute</button>
-          <button data-go="timetable"><span>▦</span>View Timetable</button>
-          <button data-go="directory"><span>📇</span>Faculty Numbers</button>
-          <button data-go="reports"><span>▥</span>Audit Reports</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="head"><h2>BCA Cohort Sections</h2><span class="tag">BCA ONLY</span></div>
-        <div class="sections">
-          <div class="section">
-            <b>2nd Year Cohort</b>
-            <div class="sl"><span>Section A</span><span>Section D</span><span>Section B</span><span>Section E</span><span>Section C</span><span>AI Section</span></div>
-          </div>
-          <div class="section">
-            <b>3rd Year Cohort</b>
-            <div class="sl"><span>Section A</span><span>AI Section</span><span>Section B</span><span>Section C</span></div>
-          </div>
+          <button data-go="substitute"><span>⚡</span>Check Substitute</button>
+          <button data-go="timetable"><span>▦</span>Master Timetable</button>
+          <button data-go="teacherstatus"><span>👤</span>Faculty Schedule</button>
         </div>
       </div>
     </section>
@@ -601,7 +648,7 @@ button { cursor: pointer; }
       <div class="card">
         <div class="head">
           <h2>⚡ Smart Substitute Finder</h2>
-          <span class="tag ready">DATE SPECIFIC • AUTO CONFLICT CHECK</span>
+          <span class="tag ready">AUTO CLOUD MATCH</span>
         </div>
         <div class="controls">
           <div class="field">
@@ -632,27 +679,28 @@ button { cursor: pointer; }
       <div id="teacherStatusResult"></div>
     </section>
 
-    <!-- DIRECTORY & CONTACTS (WITH S.NO) -->
-    <section id="directory" class="page">
+    <!-- DIRECTORY & CONTACTS (ADMIN ONLY) -->
+    <section id="directory" class="page admin-only">
       <div class="card">
-        <div class="head"><h2>📇 Faculty Directory & Contact Numbers</h2><span class="tag">WHATSAPP & SMS READY</span></div>
-        <p class="editor-note" style="padding-top:12px">Add teacher WhatsApp numbers (with 91 country code) for 1-click notification dispatch.</p>
+        <div class="head"><h2>📇 Faculty Directory & Contact Numbers</h2><span class="tag">ADMIN PRIVILEGED</span></div>
+        <p class="editor-note" style="padding-top:12px">Save faculty WhatsApp numbers for instant 1-click substitute notification.</p>
         <div class="editor-grid">
           <div><label>Faculty Name</label><select id="dirTeacherSelect" data-action="dir-select-changed"></select></div>
-          <div><label>WhatsApp / Phone Number</label><input id="dirPhone" placeholder="e.g. 919876543210"></div>
+          <div><label>WhatsApp Number (e.g. 919876543210)</label><input id="dirPhone" placeholder="919876543210"></div>
           <div class="wide"><label>Email Address</label><input id="dirEmail" placeholder="faculty@university.edu"></div>
         </div>
         <div class="editor-buttons" style="grid-template-columns: 1fr 1fr;">
-          <button class="primary" data-action="save-contact">✓ Save Contact</button>
+          <button class="primary" data-action="save-contact">✓ Save Contact to Cloud</button>
           <button class="ghost" data-action="clear-contact">↺ Reset</button>
         </div>
       </div>
+
       <div class="card">
-        <div class="head"><h2>📋 Saved Faculty Contacts List</h2></div>
+        <div class="head"><h2>📋 Saved Faculty Directory</h2></div>
         <div style="overflow-x:auto">
           <table class="dir-table">
             <thead>
-              <tr><th>#</th><th>Faculty Name</th><th>Phone Number</th><th>Email</th><th>Action</th></tr>
+              <tr><th>#</th><th>Faculty Name</th><th>WhatsApp</th><th>Email</th><th>Action</th></tr>
             </thead>
             <tbody id="dirTableBody"></tbody>
           </table>
@@ -660,14 +708,14 @@ button { cursor: pointer; }
       </div>
     </section>
 
-    <!-- TIMETABLE -->
+    <!-- MASTER TIMETABLE -->
     <section id="timetable" class="page">
       <div class="card">
-        <div class="head"><h2>📅 Master BCA Timetable</h2><span class="tag">2026–27 ACADEMIC SESSION</span></div>
-        <div class="yeartabs">
-          <button class="tab active" id="y2" data-action="set-year" data-year="2">2nd Year</button>
-          <button class="tab" id="y3" data-action="set-year" data-year="3">3rd Year</button>
+        <div class="head">
+          <h2>📅 Master Academic Timetable</h2>
+          <span class="tag ready">LIVE SYNC</span>
         </div>
+        <div class="yeartabs" id="yearTabs"></div>
         <div class="sectiontabs" id="sectionTabs"></div>
         <div class="ttwrap">
           <table class="tt">
@@ -687,32 +735,106 @@ button { cursor: pointer; }
         </div>
       </div>
 
-      <div class="card editor-card">
-        <div class="head"><h2>✏️ Edit / Add Class Slot</h2><span class="tag">ADMIN EDITOR</span></div>
-        <p class="editor-note">Tap <b>✎</b> on any cell in the table above to quickly edit that lecture slot.</p>
+      <!-- TIMETABLE EDIT CARD (ADMIN ONLY) -->
+      <div class="card editor-card admin-only">
+        <div class="head"><h2>✏️ Edit / Fill Class Slot (Permanent Cloud Save)</h2><span class="tag">ADMIN ACTIVE</span></div>
+        <p class="editor-note">Tap <b>✎</b> on any cell in the table above to load and edit that lecture slot permanently.</p>
         <div class="editor-grid">
-          <div><label>Year</label><select id="edYear" data-action="editor-year-changed"><option value="2">2nd Year</option><option value="3">3rd Year</option></select></div>
+          <div><label>Year / Semester</label><select id="edYear" data-action="editor-year-changed"></select></div>
           <div><label>Section</label><select id="edSection"></select></div>
           <div><label>Day</label><select id="edDay"></select></div>
           <div><label>Time Slot</label><select id="edSlot"></select></div>
-          <div class="wide"><label>Subject Title</label><input id="edSubject" placeholder="e.g. Data Structure"></div>
-          <div class="wide"><label>Faculty Name</label><input id="edTeacher" list="teacherOptions" placeholder="Faculty Name"><datalist id="teacherOptions"></datalist></div>
+          <div class="wide"><label>Subject Title</label><input id="edSubject" placeholder="e.g. Data Structures"></div>
+          <div class="wide"><label>Faculty Name</label><input id="edTeacher" list="teacherOptions" placeholder="Type or Select Faculty"><datalist id="teacherOptions"></datalist></div>
           <div><label>Category</label><select id="edType"><option value="">Standard Lecture</option><option value="lab">Lab Session</option><option value="sub">TND / Special</option><option value="lunch">Lunch Break</option></select></div>
         </div>
         <div class="editor-buttons">
-          <button class="primary" data-action="save-lecture">✓ Save</button>
-          <button class="success" data-action="new-lecture">＋ Clear</button>
-          <button class="danger" data-action="delete-lecture">🗑 Delete</button>
-          <button class="ghost" data-action="reset-section">↺ Reset</button>
+          <button class="primary" data-action="save-lecture">💾 Save to Cloud</button>
+          <button class="success" data-action="new-lecture">＋ Clear Form</button>
+          <button class="danger" data-action="delete-lecture">🗑 Clear Slot</button>
         </div>
       </div>
     </section>
 
-    <!-- REPORTS & SUBSTITUTE ACTIONS -->
-    <section id="reports" class="page">
+    <!-- ACADEMIC CONTROL HUB (ADMIN ONLY) -->
+    <section id="academicmgmt" class="page admin-only">
+      <!-- CHANGE MASTER PIN -->
+      <div class="card" style="border:1px solid var(--p)">
+        <div class="head">
+          <h2>🛡️ Master Security PIN Management</h2>
+          <span class="tag ready">CLOUD SECURED</span>
+        </div>
+        <div class="controls">
+          <div class="field">
+            <label>Set New Master Admin PIN</label>
+            <input type="password" id="newAdminPinInput" placeholder="Enter new PIN (e.g. 8492)">
+          </div>
+          <button class="primary" data-action="change-admin-pin">Update Master PIN</button>
+        </div>
+      </div>
+
+      <!-- MANAGE TEACHERS -->
       <div class="card">
         <div class="head">
-          <h2>📊 Substitution Log & Management</h2>
+          <h2>👤 Faculty Management (Add & Remove Teachers)</h2>
+          <span class="tag ready">CLOUD MANAGED</span>
+        </div>
+        <div class="controls">
+          <div class="field">
+            <label>New Faculty Name</label>
+            <input id="newTeacherName" placeholder="e.g. Dr. Rajesh Sharma">
+          </div>
+          <button class="primary" data-action="add-teacher">＋ Add Teacher</button>
+        </div>
+        <div class="head" style="border-top:1px solid var(--line)"><h2>Existing Faculty Members</h2></div>
+        <div id="teachersManagementList"></div>
+      </div>
+
+      <!-- MANAGE YEARS & SEMESTERS -->
+      <div class="card">
+        <div class="head">
+          <h2>🎓 Academic Years & Semesters Management</h2>
+          <span class="tag ready">CLOUD MANAGED</span>
+        </div>
+        <div class="controls">
+          <div class="field">
+            <label>New Year / Semester Name</label>
+            <input id="newYearName" placeholder="e.g. 1st Year or BCA Sem 1">
+          </div>
+          <div class="field">
+            <label>Initial Section Name</label>
+            <input id="newYearInitialSection" placeholder="e.g. Section A">
+          </div>
+          <button class="primary" data-action="add-year">＋ Create Empty Schedule</button>
+        </div>
+        <div class="head" style="border-top:1px solid var(--line)"><h2>Configured Years & Semesters</h2></div>
+        <div id="yearsManagementList"></div>
+      </div>
+
+      <!-- MANAGE SECTIONS -->
+      <div class="card">
+        <div class="head">
+          <h2>📑 Add Section to Existing Year</h2>
+        </div>
+        <div class="controls">
+          <div class="field">
+            <label>Select Year / Semester</label>
+            <select id="secTargetYear"></select>
+          </div>
+          <div class="field">
+            <label>New Section Name</label>
+            <input id="newSectionName" placeholder="e.g. Section B or AI Section">
+          </div>
+          <button class="primary" data-action="add-section">＋ Create Empty Section</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTS & LOG (ADMIN ONLY) -->
+    <section id="reports" class="page admin-only">
+      <div class="card">
+        <div class="head">
+          <h2>📊 Cloud Substitutions Audit Log</h2>
           <button class="primary" style="padding:7px 12px;font-size:10px" data-action="export-report">Export Log (.TXT)</button>
         </div>
         <div id="report"></div>
@@ -721,17 +843,19 @@ button { cursor: pointer; }
   </main>
 </div>
 
+<!-- BOTTOM NAVIGATION BAR (Auto-adjusts for Guest vs Admin) -->
 <nav class="bottom">
   <button class="active" data-go="dashboard"><span>⌂</span>Home</button>
   <button data-go="substitute"><span>⚡</span>Substitute</button>
   <button data-go="teacherstatus"><span>👤</span>Faculty</button>
-  <button data-go="directory"><span>📇</span>Directory</button>
   <button data-go="timetable"><span>▦</span>Timetable</button>
-  <button data-go="reports"><span>▥</span>Reports</button>
+  <button class="admin-only" data-go="academicmgmt"><span>⚙️</span>Manage</button>
+  <button class="admin-only" data-go="directory"><span>📇</span>Directory</button>
+  <button class="admin-only" data-go="reports"><span>▥</span>Reports</button>
 </nav>
 
 <script>
-/* ==================== EXACT FIREBASE CLOUD CONFIGURATION ==================== */
+/* ==================== FIREBASE FIRESTORE CLOUD CONFIGURATION ==================== */
 const firebaseConfig = {
   apiKey: "AIzaSyAzUh9YCm-sYqSSZqk8rWk4XO0mwn99bAs",
   authDomain: "substitute-manager-7830a.firebaseapp.com",
@@ -746,12 +870,11 @@ let db = null;
 try {
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
-  console.log("Firebase Firestore Live Connected");
 } catch(err) {
-  console.warn("Firestore offline fallback:", err);
+  console.warn("Offline Fallback:", err);
 }
 
-/* Safe Offline Fallback Store */
+/* Local Storage Fallback */
 const memoryStore = {};
 function safeGet(key, fallback) {
   try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
@@ -762,40 +885,279 @@ function safeSet(key, value) {
   catch(e) { memoryStore[key] = value; }
 }
 
+const T = ["09:00–10:00","10:00–11:00","11:00–12:00","12:00–01:00","01:00–02:00","02:00–03:15"];
+const D = ["Mon","Tue","Wed","Thu","Fri","Sat"];
+const C = (s, t, type="") => ({ s, t, type });
+const L = () => ({ s: "LUNCH", t: "", type: "lunch" });
+
+/* Empty 6-Day Timetable Template Generator */
+function createEmptyGrid() {
+  return D.map(day => [
+    day,
+    C("",""),
+    C("",""),
+    C("",""),
+    L(),
+    C("",""),
+    C("")
+  ]);
+}
+
+/* Master Config Baseline */
+let cloudMasterPin = safeGet("bcaAdminPin", "1234");
+let isAdmin = sessionStorage.getItem("bcaIsAdmin") === "true";
+
+const DEFAULT_TEACHERS = [
+  "Mohan Singh", "Sachin Kumar", "MA2", "Raj Kumar Singh", "Ms.Shifa Shakir",
+  "Aaryan Rastogi", "Jatin Patel", "Mr.Udit Kumar Mishra", "Anil Kumar Sharma",
+  "Roopesh Mishra", "Prem Prakash", "Sudhanshu Ballabh", "Ms.Gagandeep Kaur",
+  "Sristhi Tripathi", "MA1", "Ashutosh Bhatt", "Nikhil Rathore", "Dr.Abhishek",
+  "Dr.Jeelani", "Madhuresh Yadav", "Ms.Sukhman Kaur", "Pankaj Kumr Tiwari",
+  "Muskan", "Monin Kamran", "Aditya Tiwari", "Ashish Kumar", "Moin Kamran", "Ms.Silki Setia", "CA3", "Udit Kumar Mishra"
+];
+
+const DEFAULT_TIMETABLE_DATA = {
+  "2nd Year": {
+    "Section A": [
+      [D[0], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("TND 2","Ms.Shifa Shakir","sub")],
+      [D[1], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
+      [D[2], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
+      [D[3], C("R.M","Jatin Patel"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
+      [D[4], C("OOP's Using JAVA","Mohan Singh"), C("R.M","Jatin Patel"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("WD Lab","Aaryan Rastogi","lab"), C("DS Lab","Mr.Udit Kumar Mishra","lab")],
+      [D[5], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("R.M","Jatin Patel"), L(), C("TND 2","Ms.Shifa Shakir","sub"), C("OOPs JAVA Lab","Anil Kumar Sharma","lab")]
+    ],
+    "Section B": [
+      [D[0], C("R.M","Jatin Patel"), C("WD","Raj Kumar Singh"), C("OOPs JAVA Lab","Roopesh Mishra","lab"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+      [D[1], C("OB","MA2"), C("R.M","Jatin Patel"), C("MIS","Aaryan Rastogi"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+      [D[2], C("TND 2","Ms.Shifa Shakir","sub"), C("WD","Raj Kumar Singh"), C("R.M","Jatin Patel"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+      [D[3], C("OB","MA2"), C("WD","Raj Kumar Singh"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+      [D[4], C("TND 2","Ms.Shifa Shakir","sub"), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+      [D[5], C("OB","MA2"), C("TND 2","Ms.Shifa Shakir","sub"), C("MIS","Aaryan Rastogi"), L(), C("WD Lab","Aaryan Rastogi","lab"), C("DS Lab","Mr.Udit Kumar Mishra","lab")]
+    ],
+    "Section C": [
+      [D[0], C("MIS","Aaryan Rastogi"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("POM","MA2"), C("OOP's Using JAVA","Roopesh Mishra")],
+      [D[1], C("MIS","Aaryan Rastogi"), C("DS","Prem Prakash"), C("TND 3","Ms.Gagandeep Kaur","sub"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Roopesh Mishra")],
+      [D[2], C("TND 3","Ms.Gagandeep Kaur","sub"), C("DS","Prem Prakash"), C("OB","Sristhi Tripathi"), L(), C("POM","MA1"), C("OOP's Using JAVA","Roopesh Mishra")],
+      [D[3], C("MIS","Aaryan Rastogi"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("WD","Sudhanshu Ballabh"), L(), C("POM","Sristhi Tripathi"), C("OOP's Using JAVA","Roopesh Mishra")],
+      [D[4], C("TND 3","Ms.Gagandeep Kaur","sub"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("WD Lab","Raj Kumar Singh","lab"), C("DS Lab","Raj Kumar Singh","lab")],
+      [D[5], C("OB","Sristhi Tripathi"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("OOPs JAVA Lab","Sachin Kumar","lab"), C("OOP's Using JAVA","Roopesh Mishra")]
+    ],
+    "Section D": [
+      [D[0], C("DS","Roopesh Mishra"), C("WD","Sudhanshu Ballabh"), C("POM","Sristhi Tripathi"), L(), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's Using JAVA","Prem Prakash")],
+      [D[1], C("DS","Roopesh Mishra"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's using Jva Lab","Nikhil Rathore","lab"), L(), C("MIS","Ashutosh Bhatt"), C("OOP's Using JAVA","Prem Prakash")],
+      [D[2], C("DS","Roopesh Mishra"), C("POM","Sristhi Tripathi"), C("WD","Sudhanshu Ballabh"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
+      [D[3], C("DS","Roopesh Mishra"), C("WD","Sudhanshu Ballabh"), C("MIS","Ashutosh Bhatt"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
+      [D[4], C("DS","Roopesh Mishra"), C("MIS","Ashutosh Bhatt"), C("TND 3","Ms.Gagandeep Kaur","sub"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
+      [D[5], C("TND 3","Ms.Gagandeep Kaur","sub"), C("WD","Sudhanshu Ballabh"), C("POM","Sristhi Tripathi"), L(), C("WD Lab","Mohan Singh","lab"), C("DS Lab","Mohan Singh","lab")]
+    ],
+    "Section E": [
+      [D[0], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("OB","Sristhi Tripathi")],
+      [D[1], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("TND 3","Ms.Gagandeep Kaur","sub")],
+      [D[2], C("R.M","Jatin Patel"), C("DS","Roopesh Mishra"), C("OOP's using Jva Lab","Nikhil Rathore","lab"), L(), C("WD","Aditya Tiwari"), C("TND 3","Ms.Gagandeep Kaur","sub")],
+      [D[3], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OB","Sristhi Tripathi")],
+      [D[4], C("R.M","Jatin Patel"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD Lab","Sachin Kumar","lab"), C("DS Lab","Dr.Abhishek","lab")],
+      [D[5], C("R.M","Jatin Patel"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("OB","Sristhi Tripathi")]
+    ],
+    "AI Section": [
+      [D[0], C("Digital Electronics","Nikhil Rathore"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("E-Commerce & Digital Marketing","MA2")],
+      [D[1], C("OB","Sristhi Tripathi"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("E-Commerce & Digital Marketing","MA2")],
+      [D[2], C("Digital Electronics","Nikhil Rathore"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("TND 4","Ms.Sukhman Kaur","sub")],
+      [D[3], C("TND 4","Ms.Sukhman Kaur","sub"), C("Advance Python Programming","Dr.Jeelani"), C("Advance Python Lab","Nikhil Rathore","lab"), L(), C("R.M / POM","Pankaj Kumr Tiwari"), C("E-Commerce & Digital Marketing","MA2")],
+      [D[4], C("R.M / POM","Pankaj Kumr Tiwari"), C("OB","Sristhi Tripathi"), C("WD Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")],
+      [D[5], C("Digital Electronics","Nikhil Rathore"), C("R.M / POM","Pankaj Kumr Tiwari"), C("DE Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")]
+    ]
+  },
+  "3rd Year": {
+    "Section A": [
+      [D[0], C("TND 4","Ms.Sukhman Kaur","sub"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic Lab","Sachin Kumar","lab"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
+      [D[1], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
+      [D[2], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Elective 2","Roopesh Mishra"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Aditya Tiwari")],
+      [D[3], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Mobile Application Development Lab","Anil Kumar Sharma","lab"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
+      [D[4], C("Digital Electronic","Muskan"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Machine Learning Fundamental","Madhuresh Yadav")],
+      [D[5], C("Digital Electronic","Muskan"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Machine Learning Fundamental","Madhuresh Yadav")]
+    ],
+    "Section B": [
+      [D[0], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("TND 4","Ms.Sukhman Kaur","sub")],
+      [D[1], C("Elective 2","Aditya Tiwari"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Digital Electronic Lab","Sachin Kumar","lab"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
+      [D[2], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
+      [D[3], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
+      [D[4], C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Moin Kamran"), C("Mobile Application Development Lab","Anil Kumar Sharma","lab"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
+      [D[5], C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")]
+    ],
+    "Section C": [
+      [D[0], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Monin Kamran")],
+      [D[1], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Monin Kamran")],
+      [D[2], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Digital Electronic Lab","Anil Kumar Sharma","lab"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
+      [D[3], C("Machine Learning Fundamental","Madhuresh Yadav"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Mohan Singh"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
+      [D[4], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
+      [D[5], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development Lab","Mohan Singh","lab"), L(), C("Elective 2","Ashish Kumar"), C("TND 4","Ms.Sukhman Kaur","sub")]
+    ],
+    "AI Section": [
+      [D[0], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("DS Lab","Dr.Abhishek","lab"), L(), C("TND 1","Ms.Silki Setia","sub"), C("Elective 2","Ashish Kumar")],
+      [D[1], C("IPR","MA1"), C("TND 1","Ms.Silki Setia","sub"), C("DSc Lab","CA3","lab"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
+      [D[2], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("TND 1","Ms.Silki Setia","sub")],
+      [D[3], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
+      [D[4], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
+      [D[5], C("Elective 2","Ashish Kumar"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("TND 1","Ms.Silki Setia","sub")]
+    ]
+  }
+};
+
+let currentTimetable = JSON.parse(safeGet("bcaCloudTimetable", JSON.stringify(DEFAULT_TIMETABLE_DATA)));
+let currentFacultyList = JSON.parse(safeGet("bcaCloudTeachers", JSON.stringify(DEFAULT_TEACHERS)));
+let activeYear = Object.keys(currentTimetable)[0] || "2nd Year";
+let activeSection = Object.keys(currentTimetable[activeYear] || {})[0] || "Section A";
+
 /* Realtime Cloud Listeners */
-let globalSubsList = [];
+function listenToCloudMasterData() {
+  if(!db) return;
+  db.collection("academic_data").doc("master_config").onSnapshot((doc) => {
+    if(doc.exists) {
+      const data = doc.data();
+      if(data.timetable) {
+        currentTimetable = data.timetable;
+        safeSet("bcaCloudTimetable", JSON.stringify(currentTimetable));
+      }
+      if(data.teachers) {
+        currentFacultyList = data.teachers;
+        safeSet("bcaCloudTeachers", JSON.stringify(currentFacultyList));
+      }
+      if(data.adminPin) {
+        cloudMasterPin = data.adminPin;
+        safeSet("bcaAdminPin", cloudMasterPin);
+      }
+      refreshAllUI();
+    } else {
+      saveMasterDataToCloud();
+    }
+  }, console.warn);
+}
+
+function saveMasterDataToCloud() {
+  safeSet("bcaCloudTimetable", JSON.stringify(currentTimetable));
+  safeSet("bcaCloudTeachers", JSON.stringify(currentFacultyList));
+  safeSet("bcaAdminPin", cloudMasterPin);
+  if(db) {
+    db.collection("academic_data").doc("master_config").set({
+      timetable: currentTimetable,
+      teachers: currentFacultyList,
+      adminPin: cloudMasterPin,
+      lastUpdated: new Date().toISOString()
+    }).catch(console.warn);
+  }
+  refreshAllUI();
+}
+
+function refreshAllUI() {
+  const years = Object.keys(currentTimetable);
+  if(!years.includes(activeYear)) activeYear = years[0] || "";
+  const sections = activeYear ? Object.keys(currentTimetable[activeYear] || {}) : [];
+  if(!sections.includes(activeSection)) activeSection = sections[0] || "";
+
+  renderYearTabs();
+  renderSectionTabs();
+  renderTable();
+  renderFacultyManagementList();
+  renderYearsManagementList();
+  updateDropdowns();
+  updateStatsAndCharts();
+  updateAdminUI();
+}
+
+/* Realtime Cloud Substitutes */
 function listenToCloudSubstitutes() {
   if(!db) return;
   db.collection("substitutions").onSnapshot((snapshot) => {
     const list = [];
-    snapshot.forEach((doc) => {
-      list.push({ id: doc.id, ...doc.data() });
-    });
-    globalSubsList = list;
+    snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
     safeSet("bcaSubs", JSON.stringify(list));
     renderReport();
     updateDashboardSubCount();
     updateDashboardSubList();
-  }, (err) => {
-    console.warn("Cloud listen error (working offline):", err);
-  });
+  }, console.warn);
 }
 
 function listenToCloudContacts() {
   if(!db) return;
   db.collection("faculty_contacts").onSnapshot((snapshot) => {
     const contacts = getContacts();
-    snapshot.forEach((doc) => {
-      contacts[doc.id] = doc.data();
-    });
+    snapshot.forEach(doc => { contacts[doc.id] = doc.data(); });
     safeSet("bcaFacultyContacts", JSON.stringify(contacts));
     renderDirectory();
-  }, (err) => {
-    console.warn("Cloud contacts listen error:", err);
-  });
+  }, console.warn);
 }
 
-/* Event Wiring */
+/* Authentication PIN Handling */
+function updateAdminUI() {
+  if(isAdmin) {
+    document.body.classList.add("is-admin");
+    const btn = document.getElementById("authStatusBtn");
+    if(btn) {
+      btn.className = "auth-btn logged-in";
+      btn.innerHTML = "🔓 <span>Admin Active (Lock)</span>";
+    }
+    document.getElementById("sideRoleText").textContent = "👑 ADMIN ACTIVE";
+    document.getElementById("sideRoleSub").textContent = "Full Cloud Edit & Control Unlocked.";
+  } else {
+    document.body.classList.remove("is-admin");
+    const btn = document.getElementById("authStatusBtn");
+    if(btn) {
+      btn.className = "auth-btn";
+      btn.innerHTML = "🔐 <span>Admin Login</span>";
+    }
+    document.getElementById("sideRoleText").textContent = "👁️ VIEWER MODE";
+    document.getElementById("sideRoleSub").textContent = "Read-Only access active.";
+  }
+}
+
+function openAuthModal() {
+  if(isAdmin) {
+    if(confirm("Do you want to log out from Admin Mode?")) {
+      isAdmin = false;
+      sessionStorage.removeItem("bcaIsAdmin");
+      updateAdminUI();
+      renderTable();
+      renderDirectory();
+      renderReport();
+    }
+    return;
+  }
+  document.getElementById("adminPinInput").value = "";
+  document.getElementById("authModal").classList.add("active");
+  document.getElementById("adminPinInput").focus();
+}
+
+function closeAuthModal() {
+  document.getElementById("authModal").classList.remove("active");
+}
+
+function verifyPin() {
+  const entered = document.getElementById("adminPinInput").value.trim();
+  if(entered === cloudMasterPin) {
+    isAdmin = true;
+    sessionStorage.setItem("bcaIsAdmin", "true");
+    closeAuthModal();
+    updateAdminUI();
+    renderTable();
+    renderDirectory();
+    renderReport();
+    alert("✓ Admin Authorized Successfully!");
+  } else {
+    alert("❌ Invalid PIN! Access Denied.");
+  }
+}
+
+function changeAdminPin() {
+  if(!isAdmin) { openAuthModal(); return; }
+  const newPin = document.getElementById("newAdminPinInput").value.trim();
+  if(newPin.length < 4) { alert("PIN must be at least 4 digits."); return; }
+  cloudMasterPin = newPin;
+  saveMasterDataToCloud();
+  document.getElementById("newAdminPinInput").value = "";
+  alert("✓ Master Admin PIN updated permanently!");
+}
+
+/* Event Routing */
 function wireEvents() {
   document.addEventListener("click", function(e) {
     const goEl = e.target.closest("[data-go]");
@@ -805,14 +1167,17 @@ function wireEvents() {
     if(!actionEl) return;
     const action = actionEl.getAttribute("data-action");
 
+    if(action === "open-auth-modal") { openAuthModal(); return; }
+    if(action === "close-auth-modal") { closeAuthModal(); return; }
+    if(action === "verify-pin") { verifyPin(); return; }
+    if(action === "change-admin-pin") { changeAdminPin(); return; }
     if(action === "toggle-theme") { toggleTheme(); return; }
     if(action === "find-affected") { findAffected(); return; }
-    if(action === "set-year") { setYear(Number(actionEl.getAttribute("data-year"))); return; }
+    if(action === "set-year") { setYear(actionEl.getAttribute("data-year")); return; }
     if(action === "set-section") { setSection(actionEl.getAttribute("data-section")); return; }
     if(action === "save-lecture") { saveLectureEdit(); return; }
     if(action === "new-lecture") { newLecture(); return; }
     if(action === "delete-lecture") { deleteLectureEdit(); return; }
-    if(action === "reset-section") { resetCurrentSection(); return; }
     if(action === "export-report") { exportReport(); return; }
     if(action === "edit-lecture") { editLecture(actionEl.getAttribute("data-day"), Number(actionEl.getAttribute("data-slot"))); return; }
     if(action === "assign-index") { assignByIndex(Number(actionEl.getAttribute("data-index"))); return; }
@@ -822,6 +1187,14 @@ function wireEvents() {
     if(action === "copy-msg") { copyTextToClipboard(decodeURIComponent(actionEl.getAttribute("data-msg"))); return; }
     if(action === "delete-sub") { deleteSubstituteRecord(actionEl.getAttribute("data-id")); return; }
     if(action === "change-sub") { changeSubstituteRecord(actionEl.getAttribute("data-id")); return; }
+    
+    // Academic Hub Actions
+    if(action === "add-teacher") { addTeacher(); return; }
+    if(action === "remove-teacher") { removeTeacher(actionEl.getAttribute("data-name")); return; }
+    if(action === "add-year") { addYear(); return; }
+    if(action === "remove-year") { removeYear(actionEl.getAttribute("data-year")); return; }
+    if(action === "add-section") { addSection(); return; }
+    if(action === "remove-section") { removeSection(actionEl.getAttribute("data-year"), actionEl.getAttribute("data-section")); return; }
   });
 
   document.addEventListener("change", function(e) {
@@ -848,197 +1221,89 @@ function toggleTheme() {
 }
 function updateThemeBtn(isLight) {
   const b = document.getElementById("themeToggleBtn");
-  if(b) b.innerHTML = isLight ? "☀️ <span>Light Mode</span>" : "🌙 <span>Dark Mode</span>";
+  if(b) b.innerHTML = isLight ? "☀️ <span>Light</span>" : "🌙 <span>Dark</span>";
 }
 
-/* Master Timetable Data */
-const T = ["09:00–10:00","10:00–11:00","11:00–12:00","12:00–01:00","01:00–02:00","02:00–03:15"];
-const D = ["Mon","Tue","Wed","Thu","Fri","Sat"];
-const C = (s, t, type="") => ({ s, t, type });
-const L = () => ({ s: "LUNCH", t: "", type: "lunch" });
+/* Master Timetable Rendering */
+function renderYearTabs() {
+  const years = Object.keys(currentTimetable);
+  document.getElementById("yearTabs").innerHTML = years.map(y => `
+    <button class="tab ${y === activeYear ? 'active' : ''}" data-action="set-year" data-year="${escapeHtml(y)}">${escapeHtml(y)}</button>
+  `).join("");
+}
 
-const Y2 = {
-  A: [
-    [D[0], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("TND 2","Ms.Shifa Shakir","sub")],
-    [D[1], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
-    [D[2], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
-    [D[3], C("R.M","Jatin Patel"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
-    [D[4], C("OOP's Using JAVA","Mohan Singh"), C("R.M","Jatin Patel"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("WD Lab","Aaryan Rastogi","lab"), C("DS Lab","Mr.Udit Kumar Mishra","lab")],
-    [D[5], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("R.M","Jatin Patel"), L(), C("TND 2","Ms.Shifa Shakir","sub"), C("OOPs JAVA Lab","Anil Kumar Sharma","lab")]
-  ],
-  B: [
-    [D[0], C("R.M","Jatin Patel"), C("WD","Raj Kumar Singh"), C("OOPs JAVA Lab","Roopesh Mishra","lab"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
-    [D[1], C("OB","MA2"), C("R.M","Jatin Patel"), C("MIS","Aaryan Rastogi"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
-    [D[2], C("TND 2","Ms.Shifa Shakir","sub"), C("WD","Raj Kumar Singh"), C("R.M","Jatin Patel"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
-    [D[3], C("OB","MA2"), C("WD","Raj Kumar Singh"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
-    [D[4], C("TND 2","Ms.Shifa Shakir","sub"), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
-    [D[5], C("OB","MA2"), C("TND 2","Ms.Shifa Shakir","sub"), C("MIS","Aaryan Rastogi"), L(), C("WD Lab","Aaryan Rastogi","lab"), C("DS Lab","Mr.Udit Kumar Mishra","lab")]
-  ],
-  C: [
-    [D[0], C("MIS","Aaryan Rastogi"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("POM","MA2"), C("OOP's Using JAVA","Roopesh Mishra")],
-    [D[1], C("MIS","Aaryan Rastogi"), C("DS","Prem Prakash"), C("TND 3","Ms.Gagandeep Kaur","sub"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Roopesh Mishra")],
-    [D[2], C("TND 3","Ms.Gagandeep Kaur","sub"), C("DS","Prem Prakash"), C("OB","Sristhi Tripathi"), L(), C("POM","MA1"), C("OOP's Using JAVA","Roopesh Mishra")],
-    [D[3], C("MIS","Aaryan Rastogi"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("WD","Sudhanshu Ballabh"), L(), C("POM","Sristhi Tripathi"), C("OOP's Using JAVA","Roopesh Mishra")],
-    [D[4], C("TND 3","Ms.Gagandeep Kaur","sub"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("WD Lab","Raj Kumar Singh","lab"), C("DS Lab","Raj Kumar Singh","lab")],
-    [D[5], C("OB","Sristhi Tripathi"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("OOPs JAVA Lab","Sachin Kumar","lab"), C("OOP's Using JAVA","Roopesh Mishra")]
-  ],
-  D: [
-    [D[0], C("DS","Roopesh Mishra"), C("WD","Sudhanshu Ballabh"), C("POM","Sristhi Tripathi"), L(), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's Using JAVA","Prem Prakash")],
-    [D[1], C("DS","Roopesh Mishra"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's using Jva Lab","Nikhil Rathore","lab"), L(), C("MIS","Ashutosh Bhatt"), C("OOP's Using JAVA","Prem Prakash")],
-    [D[2], C("DS","Roopesh Mishra"), C("POM","Sristhi Tripathi"), C("WD","Sudhanshu Ballabh"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
-    [D[3], C("DS","Roopesh Mishra"), C("WD","Sudhanshu Ballabh"), C("MIS","Ashutosh Bhatt"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
-    [D[4], C("DS","Roopesh Mishra"), C("MIS","Ashutosh Bhatt"), C("TND 3","Ms.Gagandeep Kaur","sub"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
-    [D[5], C("TND 3","Ms.Gagandeep Kaur","sub"), C("WD","Sudhanshu Ballabh"), C("POM","Sristhi Tripathi"), L(), C("WD Lab","Mohan Singh","lab"), C("DS Lab","Mohan Singh","lab")]
-  ],
-  E: [
-    [D[0], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("OB","Sristhi Tripathi")],
-    [D[1], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("TND 3","Ms.Gagandeep Kaur","sub")],
-    [D[2], C("R.M","Jatin Patel"), C("DS","Roopesh Mishra"), C("OOP's using Jva Lab","Nikhil Rathore","lab"), L(), C("WD","Aditya Tiwari"), C("TND 3","Ms.Gagandeep Kaur","sub")],
-    [D[3], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OB","Sristhi Tripathi")],
-    [D[4], C("R.M","Jatin Patel"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD Lab","Sachin Kumar","lab"), C("DS Lab","Dr.Abhishek","lab")],
-    [D[5], C("R.M","Jatin Patel"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("OB","Sristhi Tripathi")]
-  ],
-  AI: [
-    [D[0], C("Digital Electronics","Nikhil Rathore"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("E-Commerce & Digital Marketing","MA2")],
-    [D[1], C("OB","Sristhi Tripathi"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("E-Commerce & Digital Marketing","MA2")],
-    [D[2], C("Digital Electronics","Nikhil Rathore"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("TND 4","Ms.Sukhman Kaur","sub")],
-    [D[3], C("TND 4","Ms.Sukhman Kaur","sub"), C("Advance Python Programming","Dr.Jeelani"), C("Advance Python Lab","Nikhil Rathore","lab"), L(), C("R.M / POM","Pankaj Kumr Tiwari"), C("E-Commerce & Digital Marketing","MA2")],
-    [D[4], C("R.M / POM","Pankaj Kumr Tiwari"), C("OB","Sristhi Tripathi"), C("WD Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")],
-    [D[5], C("Digital Electronics","Nikhil Rathore"), C("R.M / POM","Pankaj Kumr Tiwari"), C("DE Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")]
-  ]
-};
-
-const Y3 = {
-  A: [
-    [D[0], C("TND 4","Ms.Sukhman Kaur","sub"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic Lab","Sachin Kumar","lab"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
-    [D[1], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
-    [D[2], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Elective 2","Roopesh Mishra"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Aditya Tiwari")],
-    [D[3], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Mobile Application Development Lab","Anil Kumar Sharma","lab"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
-    [D[4], C("Digital Electronic","Muskan"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Machine Learning Fundamental","Madhuresh Yadav")],
-    [D[5], C("Digital Electronic","Muskan"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Machine Learning Fundamental","Madhuresh Yadav")]
-  ],
-  B: [
-    [D[0], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("TND 4","Ms.Sukhman Kaur","sub")],
-    [D[1], C("Elective 2","Aditya Tiwari"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Digital Electronic Lab","Sachin Kumar","lab"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
-    [D[2], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
-    [D[3], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
-    [D[4], C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Moin Kamran"), C("Mobile Application Development Lab","Anil Kumar Sharma","lab"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
-    [D[5], C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")]
-  ],
-  C: [
-    [D[0], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Monin Kamran")],
-    [D[1], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Monin Kamran")],
-    [D[2], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Digital Electronic Lab","Anil Kumar Sharma","lab"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
-    [D[3], C("Machine Learning Fundamental","Madhuresh Yadav"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Mohan Singh"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
-    [D[4], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
-    [D[5], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development Lab","Mohan Singh","lab"), L(), C("Elective 2","Ashish Kumar"), C("TND 4","Ms.Sukhman Kaur","sub")]
-  ],
-  AI: [
-    [D[0], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("DS Lab","Dr.Abhishek","lab"), L(), C("TND 1","Ms.Silki Setia","sub"), C("Elective 2","Ashish Kumar")],
-    [D[1], C("IPR","MA1"), C("TND 1","Ms.Silki Setia","sub"), C("DSc Lab","CA3","lab"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
-    [D[2], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("TND 1","Ms.Silki Setia","sub")],
-    [D[3], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
-    [D[4], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
-    [D[5], C("Elective 2","Ashish Kumar"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("TND 1","Ms.Silki Setia","sub")]
-  ]
-};
-
-let year = 2, section = "A";
-const all = () => year === 2 ? Y2 : Y3;
-
-function renderTabs() {
-  document.getElementById("sectionTabs").innerHTML = Object.keys(all()).map(s => 
-    `<button class="tab ${s === section ? "active" : ""}" data-action="set-section" data-section="${escapeHtml(s)}">${s === "AI" ? "AI Section" : "Section " + s}</button>`
-  ).join("");
+function renderSectionTabs() {
+  const sections = activeYear ? Object.keys(currentTimetable[activeYear] || {}) : [];
+  document.getElementById("sectionTabs").innerHTML = sections.map(s => `
+    <button class="tab ${s === activeSection ? 'active' : ''}" data-action="set-section" data-section="${escapeHtml(s)}">${escapeHtml(s)}</button>
+  `).join("");
 }
 
 function setYear(y) {
-  year = y;
-  section = Object.keys(all())[0];
-  document.getElementById("y2").classList.toggle("active", y === 2);
-  document.getElementById("y3").classList.toggle("active", y === 3);
-  renderTabs();
+  activeYear = y;
+  activeSection = Object.keys(currentTimetable[activeYear] || {})[0] || "";
+  renderYearTabs();
+  renderSectionTabs();
   renderTable();
 }
 
 function setSection(s) {
-  section = s;
-  renderTabs();
+  activeSection = s;
+  renderSectionTabs();
   renderTable();
 }
 
 function renderTable() {
-  const rows = all()[section] || [];
-  document.getElementById("tbody").innerHTML = rows.map(r => `
+  const rows = (activeYear && activeSection && currentTimetable[activeYear]) ? (currentTimetable[activeYear][activeSection] || []) : [];
+  const tbody = document.getElementById("tbody");
+  if(!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="padding:20px;color:var(--muted)">No classes scheduled for this section.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
     <tr>
       <td class="day">${r[0]}</td>
-      ${r.slice(1).map((x, i) => x.type === "lunch" 
-        ? `<td class="lunch edit-cell" data-action="edit-lecture" data-day="${escapeHtml(r[0])}" data-slot="${i}"><span class="edit-mark">✎</span>LUNCH</td>`
-        : `<td class="${x.type === "lab" ? "lab" : ""} ${x.type === "sub" ? "tdsub" : ""} edit-cell" data-action="edit-lecture" data-day="${escapeHtml(r[0])}" data-slot="${i}">
-             <span class="edit-mark">✎</span>
-             <span class="subject">${escapeHtml(x.s) || "Unassigned"}</span>
-             <span class="teacher">${escapeHtml(x.t) || ""}</span>
+      ${r.slice(1).map((x, i) => x.type === "lunch"
+        ? `<td class="lunch ${isAdmin ? 'edit-cell' : ''}" ${isAdmin ? `data-action="edit-lecture" data-day="${escapeHtml(r[0])}" data-slot="${i}"` : ''}>${isAdmin ? '<span class="edit-mark">✎</span>' : ''}LUNCH</td>`
+        : `<td class="${x.type === "lab" ? "lab" : ""} ${x.type === "sub" ? "tdsub" : ""} ${isAdmin ? 'edit-cell' : ''}" ${isAdmin ? `data-action="edit-lecture" data-day="${escapeHtml(r[0])}" data-slot="${i}"` : ''}>
+             ${isAdmin ? '<span class="edit-mark">✎</span>' : ''}
+             <span class="subject">${escapeHtml(x.s) || "—"}</span>
+             <span class="teacher">${escapeHtml(x.t) || (isAdmin && !x.s ? "Tap ✎ to set" : "")}</span>
            </td>`
       ).join("")}
     </tr>
   `).join("");
-  updateTeacherOptions();
 }
 
-/* Master Data Helpers */
-function getAllRowsWithYear() {
-  const res = [];
-  for(const [sec, rows] of Object.entries(Y2)) {
-    res.push({ year: 2, yearLabel: "2nd Year", sec, rows });
-  }
-  for(const [sec, rows] of Object.entries(Y3)) {
-    res.push({ year: 3, yearLabel: "3rd Year", sec, rows });
-  }
-  return res;
-}
-
-function teachers() {
-  const set = new Set();
-  getAllRowsWithYear().forEach(item => item.rows.forEach(r => r.slice(1).forEach(x => {
-    if(x.t && x.type !== "lunch") set.add(x.t);
-  })));
-  const extra = JSON.parse(safeGet("bcaExtraTeachers", "[]"));
-  extra.forEach(x => set.add(x));
-  return [...set].sort();
-}
-
-/* Editor Logic */
-function editorYearChanged() {
-  const y = Number(document.getElementById("edYear").value);
-  const secs = Object.keys(y === 2 ? Y2 : Y3);
-  document.getElementById("edSection").innerHTML = secs.map(x => `<option value="${x}">${x === "AI" ? "AI" : "Section " + x}</option>`).join("");
-}
-
-function initEditor() {
+/* Timetable Editor (Instant Cloud Sync) */
+function initEditorDropdowns() {
   document.getElementById("edDay").innerHTML = D.map(x => `<option value="${x}">${x}</option>`).join("");
   document.getElementById("edSlot").innerHTML = T.map((x, i) => `<option value="${i}">${x}</option>`).join("");
   editorYearChanged();
-  document.getElementById("edYear").value = year;
-  document.getElementById("edSection").value = section;
 }
 
-function updateTeacherOptions() {
-  const list = document.getElementById("teacherOptions");
-  updateTeacherStatusDropdown();
-  if(!list) return;
-  list.innerHTML = teachers().map(x => `<option value="${escapeHtml(x)}"></option>`).join("");
-  renderDirectory();
+function editorYearChanged() {
+  const ySel = document.getElementById("edYear");
+  const y = ySel ? ySel.value : activeYear;
+  const secs = y ? Object.keys(currentTimetable[y] || {}) : [];
+  const sSel = document.getElementById("edSection");
+  if(sSel) {
+    sSel.innerHTML = secs.map(x => `<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join("");
+  }
 }
 
 function editLecture(day, slot) {
-  document.getElementById("edYear").value = year;
+  if(!isAdmin) { openAuthModal(); return; }
+  document.getElementById("edYear").value = activeYear;
   editorYearChanged();
-  document.getElementById("edSection").value = section;
+  document.getElementById("edSection").value = activeSection;
   document.getElementById("edDay").value = day;
   document.getElementById("edSlot").value = slot;
-  const rows = (year === 2 ? Y2 : Y3)[section] || [];
+
+  const rows = currentTimetable[activeYear]?.[activeSection] || [];
   const row = rows.find(r => r[0] === day);
   const x = row ? row[slot + 1] : null;
+
   document.getElementById("edSubject").value = x?.s === "LUNCH" ? "" : (x?.s || "");
   document.getElementById("edTeacher").value = x?.t || "";
   document.getElementById("edType").value = x?.type === "lunch" ? "lunch" : (x?.type || "");
@@ -1046,7 +1311,8 @@ function editLecture(day, slot) {
 }
 
 function saveLectureEdit() {
-  const y = Number(document.getElementById("edYear").value);
+  if(!isAdmin) { openAuthModal(); return; }
+  const y = document.getElementById("edYear").value;
   const sec = document.getElementById("edSection").value;
   const day = document.getElementById("edDay").value;
   const slot = Number(document.getElementById("edSlot").value);
@@ -1054,16 +1320,26 @@ function saveLectureEdit() {
   let t = document.getElementById("edTeacher").value.trim();
   const type = document.getElementById("edType").value;
 
-  if(!s && type !== "lunch") { alert("Please provide a subject title."); return; }
+  if(!y || !sec) { alert("Please choose a valid Year and Section."); return; }
+  if(!s && type !== "lunch") { alert("Please provide a subject name."); return; }
   if(type === "lunch") t = "";
 
-  const rows = (y === 2 ? Y2 : Y3)[sec];
-  const row = rows?.find(r => r[0] === day);
-  if(row) row[slot + 1] = { s: type === "lunch" ? "LUNCH" : s, t, type };
+  if(!currentTimetable[y]) currentTimetable[y] = {};
+  if(!currentTimetable[y][sec]) currentTimetable[y][sec] = createEmptyGrid();
 
-  year = y; section = sec;
-  renderTabs(); renderTable();
-  alert("✓ Timetable slot updated.");
+  const rows = currentTimetable[y][sec];
+  const row = rows.find(r => r[0] === day);
+  if(row) {
+    row[slot + 1] = { s: type === "lunch" ? "LUNCH" : s, t, type };
+    if(t && !currentFacultyList.includes(t)) {
+      currentFacultyList.push(t);
+      currentFacultyList.sort();
+    }
+    saveMasterDataToCloud();
+    activeYear = y; activeSection = sec;
+    renderYearTabs(); renderSectionTabs(); renderTable();
+    alert("✓ Slot updated permanently on Cloud!");
+  }
 }
 
 function newLecture() {
@@ -1073,76 +1349,240 @@ function newLecture() {
 }
 
 function deleteLectureEdit() {
-  const y = Number(document.getElementById("edYear").value);
+  if(!isAdmin) { openAuthModal(); return; }
+  const y = document.getElementById("edYear").value;
   const sec = document.getElementById("edSection").value;
   const day = document.getElementById("edDay").value;
   const slot = Number(document.getElementById("edSlot").value);
-  const rows = (y === 2 ? Y2 : Y3)[sec];
-  const row = rows?.find(r => r[0] === day);
-  if(row) row[slot + 1] = { s: "", t: "", type: "" };
-  year = y; section = sec;
-  renderTabs(); renderTable();
-  alert("✓ Class slot cleared.");
-}
 
-function resetCurrentSection() {
-  const y = Number(document.getElementById("edYear").value);
-  const sec = document.getElementById("edSection").value;
-  const backup = JSON.parse(safeGet("bcaOriginalBackup", "{}"));
-  if(backup[y] && backup[y][sec]) {
-    (y === 2 ? Y2 : Y3)[sec] = backup[y][sec].map(r => r.map(x => typeof x === "object" ? { ...x } : x));
-    year = y; section = sec;
-    renderTabs(); renderTable();
-    alert("✓ Section restored.");
+  const rows = currentTimetable[y]?.[sec];
+  const row = rows?.find(r => r[0] === day);
+  if(row) {
+    row[slot + 1] = { s: "", t: "", type: "" };
+    saveMasterDataToCloud();
+    activeYear = y; activeSection = sec;
+    renderTable();
+    alert("✓ Class slot cleared.");
   }
 }
 
-function backupOriginal() {
-  if(safeGet("bcaOriginalBackup", null)) return;
-  const clone = (obj) => JSON.parse(JSON.stringify(obj));
-  safeSet("bcaOriginalBackup", JSON.stringify({ 2: clone(Y2), 3: clone(Y3) }));
+/* ==================== ACADEMIC MANAGEMENT (TEACHERS, YEARS, SECTIONS) ==================== */
+function addTeacher() {
+  if(!isAdmin) { openAuthModal(); return; }
+  const name = document.getElementById("newTeacherName").value.trim();
+  if(!name) { alert("Please enter faculty name."); return; }
+  if(currentFacultyList.includes(name)) { alert("This faculty member already exists."); return; }
+
+  currentFacultyList.push(name);
+  currentFacultyList.sort();
+  document.getElementById("newTeacherName").value = "";
+  saveMasterDataToCloud();
+  alert(`✓ ${name} added successfully!`);
 }
 
-/* Faculty Directory */
+function removeTeacher(name) {
+  if(!isAdmin) { openAuthModal(); return; }
+  if(!confirm(`Are you sure you want to remove ${name}?`)) return;
+  currentFacultyList = currentFacultyList.filter(t => t !== name);
+  saveMasterDataToCloud();
+  alert(`✓ ${name} removed.`);
+}
+
+function renderFacultyManagementList() {
+  const container = document.getElementById("teachersManagementList");
+  if(!container) return;
+  container.innerHTML = currentFacultyList.map(name => `
+    <div class="item-list-row">
+      <b>${escapeHtml(name)}</b>
+      <button class="danger-btn" data-action="remove-teacher" data-name="${escapeHtml(name)}">🗑 Remove</button>
+    </div>
+  `).join("");
+}
+
+function addYear() {
+  if(!isAdmin) { openAuthModal(); return; }
+  const yName = document.getElementById("newYearName").value.trim();
+  const initSec = document.getElementById("newYearInitialSection").value.trim() || "Section A";
+  if(!yName) { alert("Please enter Year/Semester name."); return; }
+  if(currentTimetable[yName]) { alert("This Year/Semester already exists."); return; }
+
+  // Auto-generate standard 6-day timetable with Lunch in middle
+  currentTimetable[yName] = {
+    [initSec]: createEmptyGrid()
+  };
+
+  document.getElementById("newYearName").value = "";
+  document.getElementById("newYearInitialSection").value = "";
+  activeYear = yName;
+  activeSection = initSec;
+  saveMasterDataToCloud();
+  alert(`✓ ${yName} (${initSec}) created with empty timetable grid!`);
+}
+
+function removeYear(yName) {
+  if(!isAdmin) { openAuthModal(); return; }
+  if(!confirm(`Are you sure you want to delete "${yName}"?`)) return;
+  delete currentTimetable[yName];
+  activeYear = Object.keys(currentTimetable)[0] || "";
+  activeSection = activeYear ? Object.keys(currentTimetable[activeYear] || {})[0] || "" : "";
+  saveMasterDataToCloud();
+  alert(`✓ ${yName} deleted.`);
+}
+
+function addSection() {
+  if(!isAdmin) { openAuthModal(); return; }
+  const yName = document.getElementById("secTargetYear").value;
+  const sName = document.getElementById("newSectionName").value.trim();
+  if(!yName) { alert("Please select Year/Semester."); return; }
+  if(!sName) { alert("Please enter Section name."); return; }
+  if(currentTimetable[yName]?.[sName]) { alert("This Section already exists in this Year."); return; }
+
+  if(!currentTimetable[yName]) currentTimetable[yName] = {};
+  currentTimetable[yName][sName] = createEmptyGrid();
+
+  document.getElementById("newSectionName").value = "";
+  activeYear = yName;
+  activeSection = sName;
+  saveMasterDataToCloud();
+  alert(`✓ ${sName} created under ${yName} with empty schedule slots!`);
+}
+
+function removeSection(yName, sName) {
+  if(!isAdmin) { openAuthModal(); return; }
+  if(!confirm(`Delete section "${sName}" from ${yName}?`)) return;
+  if(currentTimetable[yName]) {
+    delete currentTimetable[yName][sName];
+    activeSection = Object.keys(currentTimetable[yName])[0] || "";
+    saveMasterDataToCloud();
+    alert(`✓ ${sName} deleted.`);
+  }
+}
+
+function renderYearsManagementList() {
+  const container = document.getElementById("yearsManagementList");
+  if(!container) return;
+  const years = Object.keys(currentTimetable);
+  if(!years.length) {
+    container.innerHTML = `<div style="padding:14px;color:var(--muted)">No academic years configured.</div>`;
+    return;
+  }
+  container.innerHTML = years.map(y => {
+    const secs = Object.keys(currentTimetable[y] || {});
+    return `
+      <div style="padding:14px 16px;border-bottom:1px solid var(--line)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="font-size:13px;color:var(--p2)">${escapeHtml(y)}</strong>
+          <button class="danger-btn" data-action="remove-year" data-year="${escapeHtml(y)}">🗑 Delete Year</button>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+          ${secs.map(s => `
+            <span class="tag" style="display:inline-flex;align-items:center;gap:6px">
+              ${escapeHtml(s)}
+              <span style="color:var(--danger);cursor:pointer;font-weight:900" data-action="remove-section" data-year="${escapeHtml(y)}" data-section="${escapeHtml(s)}">✕</span>
+            </span>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* Update Dropdowns */
+function updateDropdowns() {
+  const years = Object.keys(currentTimetable);
+  const edYear = document.getElementById("edYear");
+  if(edYear) {
+    const prev = edYear.value;
+    edYear.innerHTML = years.map(y => `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join("");
+    if(years.includes(prev)) edYear.value = prev;
+  }
+  const secTargetYear = document.getElementById("secTargetYear");
+  if(secTargetYear) {
+    secTargetYear.innerHTML = years.map(y => `<option value="${escapeHtml(y)}">${escapeHtml(y)}</option>`).join("");
+  }
+  editorYearChanged();
+
+  const teacherOptions = document.getElementById("teacherOptions");
+  if(teacherOptions) {
+    teacherOptions.innerHTML = currentFacultyList.map(t => `<option value="${escapeHtml(t)}"></option>`).join("");
+  }
+  const absentTeacher = document.getElementById("absentTeacher");
+  if(absentTeacher) {
+    const prev = absentTeacher.value;
+    absentTeacher.innerHTML = currentFacultyList.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+    if(currentFacultyList.includes(prev)) absentTeacher.value = prev;
+  }
+  const statusTeacher = document.getElementById("statusTeacher");
+  if(statusTeacher) {
+    const prev = statusTeacher.value;
+    statusTeacher.innerHTML = currentFacultyList.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+    if(currentFacultyList.includes(prev)) statusTeacher.value = prev;
+  }
+  const dirTeacherSelect = document.getElementById("dirTeacherSelect");
+  if(dirTeacherSelect) {
+    const prev = dirTeacherSelect.value;
+    dirTeacherSelect.innerHTML = currentFacultyList.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+    if(currentFacultyList.includes(prev)) dirTeacherSelect.value = prev;
+  }
+
+  renderDirectory();
+}
+
+/* Stats and Charts */
+function updateStatsAndCharts() {
+  document.getElementById("statActiveTeachers").textContent = currentFacultyList.length;
+
+  let totalClasses = 0;
+  const wl = {};
+  currentFacultyList.forEach(t => wl[t] = 0);
+
+  for(const y in currentTimetable) {
+    for(const s in currentTimetable[y]) {
+      const rows = currentTimetable[y][s] || [];
+      rows.forEach(r => {
+        r.slice(1).forEach(x => {
+          if(x.s && x.type !== "lunch") {
+            totalClasses++;
+            if(x.t && wl[x.t] !== undefined) wl[x.t]++;
+          }
+        });
+      });
+    }
+  }
+  document.getElementById("totalClasses").textContent = totalClasses;
+
+  const chart = document.getElementById("chart");
+  if(chart) {
+    const top = Object.entries(wl).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    chart.innerHTML = top.map(([n, v]) => `
+      <div class="bw">
+        <em>${v}</em>
+        <div class="bar" style="height:${Math.max(26, v * 14)}px"></div>
+        <div class="bn">${escapeHtml(n).split(" ")[0]}</div>
+      </div>
+    `).join("");
+  }
+}
+
+/* Directory Contacts (Admin Accessible Only) */
 const DEFAULT_CONTACTS = {
   "Mohan Singh": { phone: "919811122233", email: "mohan.singh@university.edu" },
-  "Sachin Kumar": { phone: "919822233344", email: "sachin.kumar@university.edu" },
-  "Roopesh Mishra": { phone: "919833344455", email: "roopesh.mishra@university.edu" },
-  "Aditya Tiwari": { phone: "919844455566", email: "aditya.tiwari@university.edu" },
-  "Madhuresh Yadav": { phone: "919855566677", email: "madhuresh.yadav@university.edu" },
-  "Anil Kumar Sharma": { phone: "919866677788", email: "anil.sharma@university.edu" },
-  "Dr.Jeelani": { phone: "919877788899", email: "dr.jeelani@university.edu" },
-  "Dr.Abhishek": { phone: "919888899900", email: "dr.abhishek@university.edu" }
+  "Sachin Kumar": { phone: "919822233344", email: "sachin.kumar@university.edu" }
 };
-
 function getContacts() {
   return JSON.parse(safeGet("bcaFacultyContacts", JSON.stringify(DEFAULT_CONTACTS)));
 }
-
 function saveContact(name, phone, email) {
   const c = getContacts();
   c[name] = { phone: phone.trim(), email: email.trim() };
   safeSet("bcaFacultyContacts", JSON.stringify(c));
-  if(db) {
-    db.collection("faculty_contacts").doc(name).set(c[name]).catch(console.warn);
-  }
+  if(db) db.collection("faculty_contacts").doc(name).set(c[name]).catch(console.warn);
 }
-
 function renderDirectory() {
-  const sel = document.getElementById("dirTeacherSelect");
-  if(sel) {
-    const prev = sel.value;
-    sel.innerHTML = teachers().map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
-    if(prev) sel.value = prev;
-  }
-  loadDirectoryFormForSelected();
-
   const tbody = document.getElementById("dirTableBody");
   if(!tbody) return;
   const contacts = getContacts();
-  const allT = teachers();
-
-  tbody.innerHTML = allT.map((t, idx) => {
+  tbody.innerHTML = currentFacultyList.map((t, idx) => {
     const info = contacts[t] || { phone: "", email: "" };
     return `
       <tr>
@@ -1155,24 +1595,21 @@ function renderDirectory() {
     `;
   }).join("");
 }
-
 function loadDirectoryFormForSelected() {
   const sel = document.getElementById("dirTeacherSelect");
   if(!sel) return;
-  const name = sel.value;
-  const contacts = getContacts();
-  const info = contacts[name] || { phone: "", email: "" };
+  const info = getContacts()[sel.value] || { phone: "", email: "" };
   document.getElementById("dirPhone").value = info.phone || "";
   document.getElementById("dirEmail").value = info.email || "";
 }
-
 function loadContactForEdit(name) {
+  if(!isAdmin) { openAuthModal(); return; }
   document.getElementById("dirTeacherSelect").value = name;
   loadDirectoryFormForSelected();
   document.getElementById("dirPhone").focus();
 }
-
 function saveDirectoryContact() {
+  if(!isAdmin) { openAuthModal(); return; }
   const name = document.getElementById("dirTeacherSelect").value;
   const phone = document.getElementById("dirPhone").value;
   const email = document.getElementById("dirEmail").value;
@@ -1181,56 +1618,30 @@ function saveDirectoryContact() {
   renderDirectory();
   alert(`✓ Contact saved to cloud for ${name}`);
 }
-
 function clearDirectoryForm() {
   document.getElementById("dirPhone").value = "";
   document.getElementById("dirEmail").value = "";
 }
 
-/* Date-Specific Matching */
+/* SMART SUBSTITUTE FINDER */
 function getDayNameFromDateStr(dateStr) {
   if(!dateStr) return null;
   const d = new Date(dateStr + "T00:00:00");
   const dow = d.getDay();
-  if(dow === 0) return "Sun";
-  return D[dow - 1];
+  return dow === 0 ? "Sun" : D[dow - 1];
 }
 
-function calculateTeacherMatch(candidate, absent, day, slotIndex, targetSubject) {
-  if(teacherHasSlot(candidate, day, slotIndex)) {
-    return { score: 0, reason: "Busy in another class", available: false };
-  }
-  let score = 50;
-  let reason = "Free in this slot";
-  const candidateSubs = getSubjectsTaughtBy(candidate);
-  const isSimilar = candidateSubs.some(sub => isSubjectSimilar(sub, targetSubject));
-  if(isSimilar) { score += 35; reason = "Subject Specialist"; }
-  const todaysClasses = classesForTeacherOnDay(candidate, day).length;
-  if(todaysClasses === 0) { score += 13; if(!isSimilar) reason = "Completely Free Today"; }
-  else if(todaysClasses <= 2) { score += 8; if(!isSimilar) reason = "Light Workload Today"; }
-  return { score: Math.min(score, 98), reason, available: true };
-}
-
-function isSubjectSimilar(subA, subB) {
-  if(!subA || !subB) return false;
-  const a = subA.toLowerCase(), b = subB.toLowerCase();
-  if(a === b) return true;
-  const kws = ["java", "python", "ds", "data structure", "c++", "web", "wd", "digital", "ml", "mobile", "architecture", "mis", "ob", "pom", "rm", "tnd"];
-  return kws.some(k => a.includes(k) && b.includes(k));
-}
-
-function getSubjectsTaughtBy(name) {
-  const set = new Set();
-  getAllRowsWithYear().forEach(item => item.rows.forEach(r => r.slice(1).forEach(x => {
-    if(x.t === name && x.s && x.type !== "lunch") set.add(x.s);
-  })));
-  return [...set];
+function calculateTeacherMatch(candidate, absent, day, slotIndex) {
+  if(teacherHasSlot(candidate, day, slotIndex)) return { score: 0, reason: "Busy in another class" };
+  return { score: 85, reason: "Free in this slot" };
 }
 
 function teacherHasSlot(name, day, slotIndex) {
-  for(const item of getAllRowsWithYear()) {
-    for(const r of item.rows) {
-      if(r[0] === day && r[slotIndex + 1]?.t === name) return true;
+  for(const y in currentTimetable) {
+    for(const s in currentTimetable[y]) {
+      for(const r of currentTimetable[y][s]) {
+        if(r[0] === day && r[slotIndex + 1]?.t === name) return true;
+      }
     }
   }
   return false;
@@ -1241,84 +1652,58 @@ let lastAffectedList = [], lastTargetDate = "", lastAbsentName = "";
 function findAffected() {
   const name = document.getElementById("absentTeacher").value;
   const dateVal = document.getElementById("findDate").value;
-  if(!name) { alert("Please select an absent faculty member."); return; }
-  if(!dateVal) { alert("Please choose a date."); return; }
+  if(!name || !dateVal) { alert("Please choose both date and faculty."); return; }
 
   const day = getDayNameFromDateStr(dateVal);
   lastTargetDate = dateVal;
   lastAbsentName = name;
 
   if(day === "Sun") {
-    document.getElementById("affected").innerHTML = `
-      <div class="card">
-        <div class="head"><h2>${escapeHtml(name)} • Sunday</h2><span class="tag">0 Classes</span></div>
-        <div style="padding:16px;color:var(--muted);font-size:11px">Sunday is a scheduled college holiday. No substitution needed.</div>
-      </div>`;
+    document.getElementById("affected").innerHTML = `<div class="card"><div style="padding:16px;color:var(--muted)">Sunday is a holiday. No substitution needed.</div></div>`;
     return;
   }
 
   const affected = [];
-  getAllRowsWithYear().forEach(item => {
-    item.rows.forEach(r => {
-      if(r[0] !== day) return;
-      r.slice(1).forEach((x, i) => {
-        if(x.t === name && x.type !== "lunch") {
-          affected.push({
-            yearLabel: item.yearLabel,
-            sec: item.sec,
-            day: r[0],
-            slot: T[i],
-            slotIndex: i,
-            subject: x.s
-          });
-        }
+  for(const y in currentTimetable) {
+    for(const s in currentTimetable[y]) {
+      currentTimetable[y][s].forEach(r => {
+        if(r[0] !== day) return;
+        r.slice(1).forEach((x, i) => {
+          if(x.t === name && x.type !== "lunch") {
+            affected.push({ yearLabel: y, sec: s, day: r[0], slot: T[i], slotIndex: i, subject: x.s });
+          }
+        });
       });
-    });
-  });
+    }
+  }
 
   lastAffectedList = affected;
 
-  if(affected.length === 0) {
-    document.getElementById("affected").innerHTML = `
-      <div class="card">
-        <div class="head"><h2>${escapeHtml(name)} • ${day} (${dateVal})</h2><span class="tag ready">0 Affected Classes</span></div>
-        <div style="padding:16px;color:var(--muted);font-size:11px">No classes scheduled for ${escapeHtml(name)} on ${day}.</div>
-      </div>`;
+  if(!affected.length) {
+    document.getElementById("affected").innerHTML = `<div class="card"><div style="padding:16px;color:var(--muted)">No classes scheduled for ${escapeHtml(name)} on ${day}.</div></div>`;
     return;
   }
 
   document.getElementById("affected").innerHTML = `
     <div class="card">
-      <div class="head">
-        <h2>${escapeHtml(name)} • ${day} (${dateVal})</h2>
-        <span class="tag ready">${affected.length} Class(es) on this Date</span>
-      </div>
+      <div class="head"><h2>${escapeHtml(name)} • ${day} (${dateVal})</h2><span class="tag ready">${affected.length} Class(es)</span></div>
       ${affected.map((x, i) => {
-        const rankedCandidates = teachers()
-          .filter(t => t !== name)
-          .map(cand => ({ name: cand, ...calculateTeacherMatch(cand, name, x.day, x.slotIndex, x.subject) }))
-          .sort((c1, c2) => c2.score - c1.score);
-
+        const candidates = currentFacultyList.filter(t => t !== name).map(cand => ({ name: cand, ...calculateTeacherMatch(cand, name, x.day, x.slotIndex) })).sort((a, b) => b.score - a.score);
         return `
           <div class="sub" style="align-items:flex-start">
             <div class="ok" style="margin-top:4px">⚡</div>
             <div class="submain">
-              <b style="color:var(--p2)">${x.slot} • ${x.yearLabel} - ${x.sec === "AI" ? "AI Section" : "Section " + x.sec}</b>
-              <small>Subject: <strong>${escapeHtml(x.subject)}</strong> • Faculty: ${escapeHtml(name)}</small>
-              
+              <b style="color:var(--p2)">${x.slot} • ${x.yearLabel} - ${x.sec}</b>
+              <small>Subject: <strong>${escapeHtml(x.subject)}</strong></small>
               <div style="margin-top:8px">
-                <label style="font-size:9px;color:var(--muted);font-weight:800;display:block;margin-bottom:3px">SELECT SUBSTITUTE (RANKED BY AI %):</label>
                 <select id="pick${i}" style="width:100%;background:var(--input-bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px">
-                  ${rankedCandidates.map(cand => `
-                    <option value="${escapeHtml(cand.name)}">
-                      ${cand.score >= 80 ? '⭐ ' : ''}${escapeHtml(cand.name)} — ${cand.score}% Match (${cand.reason})
-                    </option>
-                  `).join("")}
+                  ${candidates.map(cand => `<option value="${escapeHtml(cand.name)}">${cand.score > 0 ? '⭐ ' : ''}${escapeHtml(cand.name)} (${cand.reason})</option>`).join("")}
                 </select>
               </div>
-
               <div style="margin-top:8px">
-                <button class="primary" style="width:100%" data-action="assign-index" data-index="${i}">Assign & Send Notification</button>
+                ${isAdmin
+                  ? `<button class="primary" style="width:100%" data-action="assign-index" data-index="${i}">Assign & Notify (Admin)</button>`
+                  : `<button class="ghost" style="width:100%" data-action="open-auth-modal">🔐 Login as Admin to Assign</button>`}
               </div>
             </div>
           </div>
@@ -1329,31 +1714,19 @@ function findAffected() {
 }
 
 function assignByIndex(i) {
+  if(!isAdmin) { openAuthModal(); return; }
   const x = lastAffectedList[i];
-  if(!x) return;
-  const picked = document.getElementById("pick" + i);
-  const choice = picked ? picked.value : "";
-  if(!choice) { alert("Please select a substitute."); return; }
-  
+  const choice = document.getElementById("pick" + i)?.value;
+  if(!x || !choice) return;
+
   const record = {
-    date: lastTargetDate,
-    absent: lastAbsentName,
-    day: x.day,
-    slot: x.slot,
-    yearLabel: x.yearLabel,
-    sec: x.sec,
-    subject: x.subject,
-    sub: choice,
+    date: lastTargetDate, absent: lastAbsentName, day: x.day, slot: x.slot,
+    yearLabel: x.yearLabel, sec: x.sec, subject: x.subject, sub: choice,
     createdAt: new Date().toISOString()
   };
 
   if(db) {
-    db.collection("substitutions").add(record).then(() => {
-      showNotificationDispatch(record);
-    }).catch((err) => {
-      console.warn("Offline assignment save:", err);
-      saveLocalSubstitute(record);
-    });
+    db.collection("substitutions").add(record).then(() => showNotificationDispatch(record)).catch(() => saveLocalSubstitute(record));
   } else {
     saveLocalSubstitute(record);
   }
@@ -1372,149 +1745,62 @@ function saveLocalSubstitute(record) {
 function showNotificationDispatch(a) {
   const contacts = getContacts();
   const subContact = contacts[a.sub] || { phone: "", email: "" };
-  const message = `Hello ${a.sub}, you have been assigned as a substitute lecture for ${a.absent} on ${a.date} (${a.day}) during slot ${a.slot} for BCA ${a.yearLabel} ${a.sec === "AI" ? "AI Section" : "Section " + a.sec} (${a.subject}). Thank you!`;
+  const message = `Hello ${a.sub}, you have been assigned as a substitute lecture for ${a.absent} on ${a.date} (${a.day}) during slot ${a.slot} for ${a.yearLabel} ${a.sec} (${a.subject}). Thank you!`;
 
   const waLink = subContact.phone ? `https://wa.me/${subContact.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}` : null;
   const smsLink = subContact.phone ? `sms:${subContact.phone.replace(/[^0-9]/g, '')}?body=${encodeURIComponent(message)}` : null;
 
   const affectedBox = document.getElementById("affected");
   if(affectedBox) {
-    const notifyHtml = `
+    affectedBox.insertAdjacentHTML("afterbegin", `
       <div class="card" style="border:2px solid var(--green);margin-bottom:14px">
         <div class="head" style="background:rgba(16,185,129,0.1)">
           <h2>✓ Substitute Assigned: <strong style="color:var(--green)">${escapeHtml(a.sub)}</strong></h2>
           <span class="tag ready">CLOUD SAVED</span>
         </div>
         <div style="padding:14px">
-          <p style="margin:0 0 8px;font-size:11px"><strong>Class:</strong> ${a.yearLabel} ${a.sec === "AI" ? "AI" : "Sec " + a.sec} • ${escapeHtml(a.subject)} • ${a.slot}</p>
           <div style="background:var(--input-bg);padding:10px;border-radius:8px;font-size:10px;border:1px solid var(--line);margin-bottom:10px">
             "${escapeHtml(message)}"
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            ${waLink ? `<a href="${waLink}" target="_blank" class="notify-btn-wa">💬 Send WhatsApp</a>` : `<button class="ghost" data-go="directory" style="font-size:10px">⚠️ Add Phone Number</button>`}
+            ${waLink ? `<a href="${waLink}" target="_blank" class="notify-btn-wa">💬 Send WhatsApp</a>` : ''}
             ${smsLink ? `<a href="${smsLink}" class="notify-btn-sms">📱 Send SMS</a>` : ''}
-            <button class="primary" style="padding:7px 10px;font-size:10px" data-action="copy-msg" data-msg="${encodeURIComponent(message)}">📋 Copy</button>
+            <button class="primary" style="padding:7px 10px;font-size:10px" data-action="copy-msg" data-msg="${encodeURIComponent(message)}">📋 Copy Notice</button>
           </div>
         </div>
       </div>
-    `;
-    affectedBox.insertAdjacentHTML("afterbegin", notifyHtml);
+    `);
   }
 }
 
-/* Faculty Status */
-function updateTeacherStatusDropdown() {
-  const sel = document.getElementById("statusTeacher");
-  if(!sel) return;
-  const prev = sel.value;
-  sel.innerHTML = teachers().map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
-  if(prev && teachers().includes(prev)) sel.value = prev;
-}
-
-function classesForTeacherOnDay(name, day) {
-  const out = [];
-  if(!day) return out;
-  getAllRowsWithYear().forEach(item => item.rows.forEach(r => {
-    if(r[0] !== day) return;
-    r.slice(1).forEach((x, i) => {
-      if(x.t === name && x.type !== "lunch") {
-        out.push({ yearLabel: item.yearLabel, sec: item.sec, slot: T[i], slotIndex: i, subject: x.s, type: x.type });
-      }
-    });
-  }));
-  out.sort((a, b) => a.slotIndex - b.slotIndex);
-  return out;
-}
-
-function renderTeacherStatus() {
-  const box = document.getElementById("teacherStatusResult");
-  if(!box) return;
-  const name = document.getElementById("statusTeacher")?.value;
-  if(!name) { box.innerHTML = `<div class="card"><div style="padding:16px;color:var(--muted)">Select a teacher above.</div></div>`; return; }
-
-  let weekly = 0;
-  getAllRowsWithYear().forEach(item => item.rows.forEach(r => r.slice(1).forEach(x => { if(x.t === name && x.type !== "lunch") weekly++; })));
-
-  const dow = new Date().getDay();
-  const day = dow === 0 ? null : D[dow - 1];
-  const todays = classesForTeacherOnDay(name, day);
-  const contacts = getContacts()[name] || { phone: "", email: "" };
-
-  const todayListHtml = todays.length ? todays.map(c => `
-    <div class="sub">
-      <div class="ok">▫</div>
-      <div class="submain">
-        <b>${c.slot} • ${c.yearLabel} - ${c.sec === "AI" ? "AI Section" : "Section " + c.sec}</b>
-        <small>${escapeHtml(c.subject)}</small>
-      </div>
-    </div>
-  `).join("") : `<div style="padding:16px;color:var(--muted);font-size:11px">No classes scheduled for today.</div>`;
-
-  box.innerHTML = `
-    <div class="stats" style="grid-template-columns:1fr 1fr 1fr">
-      <div class="stat purple"><b>Weekly Lectures</b><strong>${weekly}</strong></div>
-      <div class="stat blue"><b>Today's Classes</b><strong>${todays.length}</strong></div>
-      <div class="stat green"><b>Phone</b><strong style="font-size:13px;margin-top:10px">${contacts.phone || "Not Set"}</strong></div>
-    </div>
-    <div class="card"><div class="head"><h2>📋 Today's Schedule Overview ${day ? "• " + day : ""}</h2></div>${todayListHtml}</div>
-  `;
-}
-
-/* Edit / Delete / Re-dispatch Cloud Substitute */
+/* Reports & Delete Substitutes */
 function deleteSubstituteRecord(id) {
-  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
-  const item = arr.find(x => x.id === id);
-  if(!item) return;
-
-  if(confirm(`Are you sure you want to cancel the substitute assignment of ${item.sub} for ${item.subject}?`)) {
-    if(db && id && !id.startsWith("sub_")) {
-      db.collection("substitutions").doc(id).delete().catch(console.warn);
-    } else {
-      const idx = arr.findIndex(x => x.id === id);
-      if(idx !== -1) arr.splice(idx, 1);
-      safeSet("bcaSubs", JSON.stringify(arr));
-      renderReport();
-      updateDashboardSubCount();
-    }
-
-    const cancelMsg = `CANCELLATION NOTICE: The substitute lecture assigned to ${item.sub} for ${item.subject} on ${item.date} (${item.slot}, BCA ${item.yearLabel} ${item.sec}) has been CANCELLED.`;
-    const contacts = getContacts();
-    const phone = contacts[item.sub]?.phone;
-    const waLink = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(cancelMsg)}` : null;
-
-    alert("✓ Substitute removed from Cloud.");
-    if(waLink && confirm("Send Cancellation Notice to " + item.sub + " via WhatsApp?")) {
-      window.open(waLink, "_blank");
-    }
+  if(!isAdmin) { openAuthModal(); return; }
+  if(!confirm("Are you sure you want to remove this substitution?")) return;
+  if(db && id && !id.startsWith("sub_")) {
+    db.collection("substitutions").doc(id).delete().catch(console.warn);
+  } else {
+    const arr = JSON.parse(safeGet("bcaSubs", "[]")).filter(x => x.id !== id);
+    safeSet("bcaSubs", JSON.stringify(arr));
+    renderReport();
+    updateDashboardSubCount();
   }
 }
 
 function changeSubstituteRecord(id) {
+  if(!isAdmin) { openAuthModal(); return; }
   const arr = JSON.parse(safeGet("bcaSubs", "[]"));
   const item = arr.find(x => x.id === id);
   if(!item) return;
-
-  const currentSub = item.sub;
-  const newSub = prompt(`Change substitute for ${item.subject} (${item.date}, ${item.slot}):\nEnter new faculty name:`, currentSub);
-  if(!newSub || newSub.trim() === "" || newSub === currentSub) return;
-
-  item.sub = newSub.trim();
+  const newSub = prompt(`Change substitute for ${item.subject}:`, item.sub);
+  if(!newSub || newSub === item.sub) return;
 
   if(db && id && !id.startsWith("sub_")) {
-    db.collection("substitutions").doc(id).update({ sub: item.sub }).catch(console.warn);
+    db.collection("substitutions").doc(id).update({ sub: newSub.trim() }).catch(console.warn);
   } else {
+    item.sub = newSub.trim();
     safeSet("bcaSubs", JSON.stringify(arr));
     renderReport();
-  }
-
-  const updateMsg = `UPDATE: ${item.sub} has now been assigned as substitute for ${item.absent} on ${item.date} (${item.slot}) for BCA ${item.yearLabel} ${item.sec} (${item.subject}).`;
-  const contacts = getContacts();
-  const phone = contacts[item.sub]?.phone;
-  const waLink = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(updateMsg)}` : null;
-
-  alert("✓ Substitute updated to " + item.sub);
-  if(waLink && confirm("Send updated assignment to " + item.sub + " via WhatsApp?")) {
-    window.open(waLink, "_blank");
   }
 }
 
@@ -1522,56 +1808,35 @@ function renderReport() {
   const arr = JSON.parse(safeGet("bcaSubs", "[]"));
   const reportBox = document.getElementById("report");
   if(!reportBox) return;
-
   const contacts = getContacts();
 
   reportBox.innerHTML = arr.length ? arr.slice().reverse().map(x => {
-    const msg = `Substitute Notice: ${x.sub} takes ${x.subject} for ${x.absent} on ${x.date} (${x.slot}, BCA ${x.yearLabel} ${x.sec}).`;
     const phone = contacts[x.sub]?.phone;
+    const msg = `Substitute Notice: ${x.sub} takes ${x.subject} for ${x.absent} on ${x.date} (${x.slot}, ${x.yearLabel} ${x.sec}).`;
     const waLink = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}` : null;
 
     return `
       <div class="reportrow">
-        <b>${escapeHtml(x.date)} • ${escapeHtml(x.slot)} • ${escapeHtml(x.yearLabel)} - ${x.sec === "AI" ? "AI Section" : "Section " + escapeHtml(x.sec)}</b>
-        <small>
-          Subject: <strong>${escapeHtml(x.subject)}</strong><br>
-          Absent Faculty: <span style="color:var(--pink)">${escapeHtml(x.absent)}</span> ➔ Assigned: <strong style="color:var(--green)">${escapeHtml(x.sub)}</strong>
-        </small>
+        <b>${escapeHtml(x.date)} • ${escapeHtml(x.slot)} • ${escapeHtml(x.yearLabel)} - ${escapeHtml(x.sec)}</b>
+        <small>Subject: <strong>${escapeHtml(x.subject)}</strong><br>Absent: ${escapeHtml(x.absent)} ➔ Substitute: <strong style="color:var(--green)">${escapeHtml(x.sub)}</strong></small>
         <div class="report-actions">
           ${waLink ? `<a href="${waLink}" target="_blank" class="notify-btn-wa" style="padding:4px 8px;font-size:9px">💬 WhatsApp</a>` : ''}
           <button class="primary" style="padding:4px 8px;font-size:9px" data-action="copy-msg" data-msg="${encodeURIComponent(msg)}">📋 Copy</button>
-          <button class="ghost" style="padding:4px 8px;font-size:9px;border-radius:6px" data-action="change-sub" data-id="${x.id}">✏️ Change</button>
-          <button class="danger" style="padding:4px 8px;font-size:9px;border-radius:6px" data-action="delete-sub" data-id="${x.id}">🗑 Delete</button>
+          <button class="ghost" style="padding:4px 8px;font-size:9px" data-action="change-sub" data-id="${x.id}">✏️ Change</button>
+          <button class="danger-btn" style="padding:4px 8px;font-size:9px" data-action="delete-sub" data-id="${x.id}">🗑 Delete</button>
         </div>
       </div>
     `;
-  }).join("") : `<div style="padding:16px;color:var(--muted);font-size:11px">No substitution assignments recorded yet.</div>`;
+  }).join("") : `<div style="padding:16px;color:var(--muted)">No substitution assignments recorded.</div>`;
 }
 
 function updateDashboardSubList() {
   const arr = JSON.parse(safeGet("bcaSubs", "[]"));
   const sublist = document.getElementById("sublist");
   if(!sublist) return;
-
   sublist.innerHTML = arr.length ? arr.slice(-3).reverse().map(x => `
-    <div class="sub">
-      <div class="ok">✓</div>
-      <div class="submain">
-        <b>${x.slot} • ${x.yearLabel} ${x.sec}</b>
-        <small>${x.subject} • ${x.absent} ➔ <strong style="color:var(--green)">${x.sub}</strong></small>
-      </div>
-    </div>
-  `).join("") : `<div style="padding:14px;font-size:11px;color:var(--muted)">No active substitutions recorded.</div>`;
-}
-
-function exportReport() {
-  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
-  const text = "BCA DEPARTMENT - DAILY SUBSTITUTION AUDIT LOG\nGenerated: " + new Date().toLocaleString() + "\n===========================================================\n\n" +
-    (arr.length ? arr.map(x => `Date: ${x.date} | Day: ${x.day} | Slot: ${x.slot} | Cohort: ${x.yearLabel} ${x.sec} | Subject: ${x.subject}\nAbsent: ${x.absent} -> Substitute: ${x.sub}\n-----------------------------------------------------------`).join("\n") : "No records");
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
-  a.download = "BCA_Substitution_Report.txt";
-  a.click();
+    <div class="sub"><div class="ok">✓</div><div class="submain"><b>${x.slot} • ${x.yearLabel} ${x.sec}</b><small>${x.subject} • ${x.absent} ➔ <strong style="color:var(--green)">${x.sub}</strong></small></div></div>
+  `).join("") : `<div style="padding:14px;color:var(--muted);font-size:11px">No active substitutions recorded.</div>`;
 }
 
 function updateDashboardSubCount() {
@@ -1580,18 +1845,69 @@ function updateDashboardSubCount() {
   if(el) el.textContent = arr.length;
 }
 
+function exportReport() {
+  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
+  const text = "ACADEMIC SUBSTITUTION AUDIT LOG\nGenerated: " + new Date().toLocaleString() + "\n\n" +
+    (arr.length ? arr.map(x => `Date: ${x.date} | Day: ${x.day} | Slot: ${x.slot} | Cohort: ${x.yearLabel} ${x.sec} | Subject: ${x.subject}\nAbsent: ${x.absent} -> Substitute: ${x.sub}\n-----------------------------------------------------------`).join("\n") : "No records");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  a.download = "Academic_Substitution_Report.txt";
+  a.click();
+}
+
 function copyTextToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => alert("✓ Message copied to clipboard!")).catch(() => alert(text));
+  navigator.clipboard.writeText(text).then(() => alert("✓ Copied to clipboard!")).catch(() => alert(text));
+}
+
+function renderTeacherStatus() {
+  const name = document.getElementById("statusTeacher")?.value;
+  const box = document.getElementById("teacherStatusResult");
+  if(!box || !name) return;
+
+  const dow = new Date().getDay();
+  const day = dow === 0 ? null : D[dow - 1];
+  let weekly = 0;
+  const todays = [];
+
+  for(const y in currentTimetable) {
+    for(const s in currentTimetable[y]) {
+      currentTimetable[y][s].forEach(r => {
+        r.slice(1).forEach((x, i) => {
+          if(x.t === name && x.type !== "lunch") {
+            weekly++;
+            if(r[0] === day) todays.push({ yearLabel: y, sec: s, slot: T[i], subject: x.s });
+          }
+        });
+      });
+    }
+  }
+
+  box.innerHTML = `
+    <div class="stats" style="grid-template-columns:1fr 1fr">
+      <div class="stat purple"><b>Weekly Lectures</b><strong>${weekly}</strong></div>
+      <div class="stat blue"><b>Today's Classes</b><strong>${todays.length}</strong></div>
+    </div>
+    <div class="card"><div class="head"><h2>Today's Schedule Overview ${day ? "• " + day : ""}</h2></div>
+      ${todays.length ? todays.map(c => `
+        <div class="sub"><div class="ok">▫</div><div class="submain"><b>${c.slot} • ${c.yearLabel} - ${c.sec}</b><small>${escapeHtml(c.subject)}</small></div></div>
+      `).join("") : '<div style="padding:16px;color:var(--muted)">No classes scheduled for today.</div>'}
+    </div>
+  `;
 }
 
 function go(id, btn) {
+  if((id === "academicmgmt" || id === "directory" || id === "reports") && !isAdmin) {
+    openAuthModal();
+    return;
+  }
   document.querySelectorAll(".page").forEach(x => x.classList.remove("active"));
   const p = document.getElementById(id);
   if(p) p.classList.add("active");
   document.querySelectorAll(".nav, .bottom button").forEach(x => x.classList.remove("active"));
   if(btn) btn.classList.add("active");
   if(id === "timetable") renderTable();
-  if(id === "teacherstatus") { updateTeacherStatusDropdown(); renderTeacherStatus(); }
+  if(id === "academicmgmt") { renderFacultyManagementList(); renderYearsManagementList(); }
+  if(id === "teacherstatus") renderTeacherStatus();
   if(id === "directory") renderDirectory();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -1600,59 +1916,18 @@ function escapeHtml(str) {
   return String(str == null ? "" : str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-/* Initialization Pipeline */
-function step(fn, label) {
-  try { fn(); } catch(e) { console.error("Init Error at " + label, e); }
-}
+/* Initialization */
+initTheme();
+initEditorDropdowns();
+refreshAllUI();
+listenToCloudMasterData();
+listenToCloudSubstitutes();
+listenToCloudContacts();
 
-step(() => initTheme(), "initTheme");
-step(() => backupOriginal(), "backupOriginal");
-step(() => initEditor(), "initEditor");
-step(() => renderTabs(), "renderTabs");
-step(() => renderTable(), "renderTable");
-step(() => renderReport(), "renderReport");
-step(() => renderDirectory(), "renderDirectory");
-step(() => listenToCloudSubstitutes(), "listenToCloudSubstitutes");
-step(() => listenToCloudContacts(), "listenToCloudContacts");
-
-step(() => {
-  const d = new Date();
-  document.getElementById("today").textContent = d.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
-  const dp = document.getElementById("findDate");
-  if(dp) dp.valueAsDate = d;
-}, "dateSetup");
-
-step(() => {
-  const fac = teachers();
-  document.getElementById("statActiveTeachers").textContent = fac.length;
-  document.getElementById("absentTeacher").innerHTML = fac.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
-  updateTeacherStatusDropdown();
-}, "dropdowns");
-
-step(() => {
-  let count = 0;
-  getAllRowsWithYear().forEach(item => {
-    item.rows.forEach(r => {
-      r.slice(1).forEach(x => { if(x.s && x.type !== "lunch") count++; });
-    });
-  });
-  document.getElementById("totalClasses").textContent = count;
-  updateDashboardSubCount();
-}, "stats");
-
-step(() => {
-  const wl = {};
-  teachers().forEach(t => wl[t] = 0);
-  getAllRowsWithYear().forEach(item => item.rows.forEach(r => r.slice(1).forEach(x => { if(x.t) wl[x.t]++; })));
-  const top = Object.entries(wl).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  document.getElementById("chart").innerHTML = top.map(([n, v]) => `
-    <div class="bw">
-      <em>${v}</em>
-      <div class="bar" style="height:${Math.max(26, v * 14)}px"></div>
-      <div class="bn">${escapeHtml(n).split(" ")[0]}</div>
-    </div>
-  `).join("");
-}, "chart");
+const d = new Date();
+document.getElementById("today").textContent = d.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
+const dp = document.getElementById("findDate");
+if(dp) dp.valueAsDate = d;
 </script>
 </body>
 </html>
