@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>BCA Smart Timetable & Cloud Substitute Manager</title>
+
+<!-- Firebase SDKs (Compat Version for Mobile & Web Standalone) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+:root {
+  --bg: #080d18;
+  --panel: #101827;
+  --panel2: #141e30;
+  --line: #29364b;
+  --text: #f5f7ff;
+  --muted: #8f9bb0;
+  --p: #7645ff;
+  --p2: #9a3cff;
+  --green: #17c784;
+  --orange: #ff851f;
+  --pink: #e73577;
+  --blue: #2d79ff;
+  --card-bg: linear-gradient(145deg, #101827, #111b2b);
+  --header-bg: #0b111eec;
+  --side-bg: #0d1422;
+  --input-bg: #0c1422;
+  --table-bg: #101927;
+  --table-th: #151f31;
+  --chip-bg: #172237;
+  --chip-border: #2f3d54;
+}
+
+body.light-theme {
+  --bg: #f4f6fb;
+  --panel: #ffffff;
+  --panel2: #f8fafc;
+  --line: #cbd5e1;
+  --text: #0f172a;
+  --muted: #64748b;
+  --p: #6366f1;
+  --p2: #8b5cf6;
+  --green: #10b981;
+  --orange: #f59e0b;
+  --pink: #ec4899;
+  --blue: #3b82f6;
+  --card-bg: #ffffff;
+  --header-bg: #ffffffee;
+  --side-bg: #f8fafc;
+  --input-bg: #f1f5f9;
+  --table-bg: #ffffff;
+  --table-th: #e2e8f0;
+  --chip-bg: #e2e8f0;
+  --chip-border: #cbd5e1;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at 80% 0, #17213c 0, var(--bg) 40%);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  overflow-x: hidden;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+body.light-theme {
+  background: radial-gradient(circle at 80% 0, #e0e7ff 0, #f4f6fb 40%);
+}
+
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+
+/* Topbar */
+.top {
+  height: 68px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(16px);
+}
+.brand-wrap { display: flex; align-items: center; }
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--p), var(--p2));
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #fff;
+}
+.brand { margin-left: 10px; }
+.brand b { font-size: 16px; display: block; }
+.brand small { color: var(--muted); font-size: 10px; }
+
+.header-actions { display: flex; align-items: center; gap: 8px; }
+.theme-toggle {
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cloud-badge {
+  font-size: 9px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.cloud-online { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+/* Layout */
+.layout { display: flex; }
+.side {
+  position: fixed;
+  top: 68px;
+  bottom: 0;
+  width: 200px;
+  background: var(--side-bg);
+  border-right: 1px solid var(--line);
+  padding: 16px 10px;
+}
+.nav {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  width: 100%;
+  text-align: left;
+  border-radius: 10px;
+  padding: 11px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 3px 0;
+  display: flex;
+  align-items: center;
+}
+.nav span { font-size: 15px; margin-right: 10px; }
+.nav.active, .nav:hover {
+  background: linear-gradient(90deg, var(--p), var(--p2));
+  color: #ffffff;
+}
+.only {
+  margin-top: 20px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+}
+.only b { color: var(--p2); font-size: 11px; display: block; }
+.only small { display: block; color: var(--muted); font-size: 10px; line-height: 1.4; margin-top: 4px; }
+
+.main {
+  margin-left: 200px;
+  width: calc(100% - 200px);
+  max-width: 1400px;
+  padding: 20px;
+}
+.page { display: none; }
+.page.active { display: block; }
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.hero h1 { font-size: 22px; margin: 0; }
+.hero p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+.date {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.stat {
+  min-height: 90px;
+  border-radius: 14px;
+  padding: 14px;
+  color: #fff;
+}
+.stat b { display: block; font-size: 10px; font-weight: 600; opacity: 0.9; text-transform: uppercase; }
+.stat strong { display: block; font-size: 24px; margin-top: 8px; }
+.purple { background: linear-gradient(135deg, #6535e6, #793eff); }
+.blue { background: linear-gradient(135deg, #2165dc, #317dff); }
+.orange { background: linear-gradient(135deg, #ed6914, #ff861e); }
+.green { background: linear-gradient(135deg, #0da76f, #18c886); }
+.pink { background: linear-gradient(135deg, #c52b63, #e73879); }
+.stat.clickable { cursor: pointer; }
+
+/* Cards & Elements */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.head {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.head h2 { font-size: 14px; margin: 0; }
+.tag {
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid var(--chip-border);
+  background: var(--chip-bg);
+  color: var(--text);
+  padding: 5px 10px;
+  border-radius: 999px;
+}
+.ready { color: #10b981; background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); }
+
+.sub {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px dashed var(--line);
+  align-items: center;
+}
+.ok {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  background: rgba(23, 199, 132, 0.15);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+  font-weight: bold;
+  font-size: 12px;
+}
+.submain { min-width: 0; flex: 1; }
+.submain b { font-size: 12px; display: block; }
+.submain small { display: block; color: var(--muted); font-size: 11px; margin-top: 3px; line-height: 1.4; }
+
+/* Chart */
+.chart {
+  height: 170px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 16px;
+  overflow-x: auto;
+}
+.bw {
+  min-width: 44px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+.bw em { font-size: 10px; font-style: normal; font-weight: 800; }
+.bar {
+  width: 24px;
+  border-radius: 5px 5px 2px 2px;
+  background: linear-gradient(var(--p2), var(--p));
+  margin-top: 4px;
+}
+.bn { font-size: 8px; color: var(--muted); text-align: center; line-height: 1.2; margin-top: 5px; }
+
+/* Quick Actions & Grids */
+.quick {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 14px;
+}
+.quick button {
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 12px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.quick span { display: block; font-size: 18px; margin-bottom: 4px; }
+
+.sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 14px;
+}
+.section {
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+}
+.section b { font-size: 11px; color: var(--p2); }
+.sl { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 8px; }
+.sl span { font-size: 10px; color: var(--muted); }
+
+/* Controls & Forms */
+.controls {
+  padding: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.field { flex: 1; min-width: 150px; }
+.field label {
+  display: block;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 9px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+.field input, .field select {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 10px;
+  outline: none;
+}
+
+.primary {
+  border: 0;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--p), var(--p2));
+  color: #fff;
+  font-weight: 800;
+  padding: 10px 14px;
+}
+
+.notify-btn-wa {
+  background: #17c784;
+  color: #ffffff;
+  border: 0;
+  padding: 7px 11px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+.notify-btn-sms {
+  background: #2d79ff;
+  color: #ffffff;
+  border: 0;
+  padding: 7px 11px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+
+/* Master Timetable Grid (No Cut Borders) */
+.yeartabs { display: flex; gap: 8px; padding: 14px 16px 0; }
+.tab {
+  border: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tab.active { background: var(--p); color: #fff; border-color: var(--p); }
+
+.sectiontabs { display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto; }
+.sectiontabs .tab { white-space: nowrap; }
+
+.ttwrap { overflow-x: auto; padding: 0 16px 16px; }
+.tt {
+  border-collapse: collapse;
+  min-width: 850px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.tt th, .tt td {
+  border: 1px solid var(--line);
+  text-align: center;
+}
+.tt th { height: 38px; background: var(--table-th); color: var(--muted); font-size: 10px; }
+.tt td { height: 75px; padding: 5px; vertical-align: middle; font-size: 9px; background: var(--table-bg); }
+.day { font-weight: 900; color: var(--text); width: 60px; background: var(--panel2) !important; }
+.subject { font-weight: 800; display: block; line-height: 1.2; font-size: 10px; }
+.teacher { color: var(--muted); font-size: 8px; display: block; margin-top: 3px; }
+.lab { background: rgba(234, 179, 8, 0.15) !important; }
+.tdsub { background: rgba(147, 51, 234, 0.15) !important; }
+.lunch { font-size: 20px; letter-spacing: 5px; font-family: Georgia, serif; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); background: var(--panel2) !important; }
+
+/* Editor Card */
+.editor-note { margin: 0; padding: 0 16px 12px; color: var(--muted); font-size: 11px; line-height: 1.4; }
+.editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 12px; }
+.editor-grid > div { min-width: 0; }
+.editor-grid .wide { grid-column: span 2; }
+.editor-grid label { display: block; color: var(--muted); font-size: 9px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+.editor-grid input, .editor-grid select { width: 100%; background: var(--input-bg); color: var(--text); border: 1px solid var(--line); border-radius: 9px; padding: 10px; outline: none; }
+.editor-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 16px 16px; }
+.editor-buttons button { border: 1px solid var(--line); border-radius: 9px; padding: 10px; color: #fff; background: var(--panel2); font-size: 10px; font-weight: 800; }
+.editor-buttons .primary { background: linear-gradient(135deg, var(--p), var(--p2)); border: 0; }
+.editor-buttons .success { background: #103126; border-color: #1c7256; color: #52dfb1; }
+.editor-buttons .danger { background: #351822; border-color: #713247; color: #ff9eb0; }
+.editor-buttons .ghost { background: var(--panel); border-color: var(--line); color: var(--muted); }
+
+.edit-cell { cursor: pointer; position: relative; }
+.edit-cell:hover { outline: 2px solid var(--p); outline-offset: -2px; }
+.edit-mark { position: absolute; top: 3px; right: 3px; font-size: 8px; opacity: 0.6; }
+
+/* Directory Table with S.No */
+.dir-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.dir-table th, .dir-table td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: left; }
+.dir-table th { background: var(--table-th); color: var(--muted); font-size: 10px; }
+
+/* Report Action Rows */
+.reportrow { padding: 14px 16px; border-bottom: 1px dashed var(--line); font-size: 11px; }
+.reportrow b { display: block; font-size: 12px; }
+.reportrow small { color: var(--muted); line-height: 1.4; }
+.report-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+.bottom { display: none; }
+@media(max-width: 800px) {
+  .top { height: 62px; padding: 0 12px; }
+  .logo { width: 36px; height: 36px; }
+  .brand b { font-size: 14px; }
+  .side { display: none; }
+  .main { margin: 0; width: 100%; padding: 12px 10px 88px; }
+  .hero { display: block; }
+  .hero h1 { font-size: 18px; }
+  .date { display: inline-block; margin-top: 8px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat strong { font-size: 22px; }
+  .stat:last-child { grid-column: span 2; }
+  .quick { grid-template-columns: 1fr 1fr; }
+  .sections { grid-template-columns: 1fr; }
+  .controls { display: block; }
+  .field { margin-bottom: 8px; }
+  .primary { width: 100%; }
+  .editor-grid { grid-template-columns: 1fr; }
+  .editor-grid .wide { grid-column: span 1; }
+  .editor-buttons { grid-template-columns: 1fr 1fr; }
+  .bottom {
+    display: flex;
+    position: fixed;
+    z-index: 100;
+    left: 8px; right: 8px; bottom: 8px;
+    height: 60px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--header-bg);
+    backdrop-filter: blur(18px);
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  .bottom button {
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font-size: 8px;
+    font-weight: 700;
+    padding: 6px 8px;
+    border-radius: 10px;
+  }
+  .bottom button span { display: block; font-size: 16px; margin-bottom: 2px; }
+  .bottom button.active { background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand-wrap">
+    <div class="logo">TM</div>
+    <div class="brand">
+      <b>Smart Timetable</b>
+      <small>Substitute Manager • BCA Department</small>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span class="cloud-badge cloud-online" id="cloudStatus">☁️ Cloud Connected</span>
+    <button class="theme-toggle" data-action="toggle-theme" id="themeToggleBtn">🌙 <span>Dark Mode</span></button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <button class="nav active" data-go="dashboard"><span>⌂</span>Dashboard</button>
+    <button class="nav" data-go="substitute"><span>⚡</span>Smart Substitute</button>
+    <button class="nav" data-go="teacherstatus"><span>👤</span>Faculty Status</button>
+    <button class="nav" data-go="directory"><span>📇</span>Faculty Directory</button>
+    <button class="nav" data-go="timetable"><span>▦</span>Timetable</button>
+    <button class="nav" data-go="reports"><span>▥</span>Reports & Actions</button>
+    <div class="only">
+      <b>🎓 BCA ONLY</b>
+      <small>2nd & 3rd Year<br>Firebase Realtime Sync Active</small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="page active">
+      <div class="hero">
+        <div>
+          <h1>Welcome, Administrator 👋</h1>
+          <p>BCA Academic Timetable & Smart Cloud Substitute Control</p>
+        </div>
+        <div class="date" id="today"></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat purple clickable" data-go="teacherstatus"><b>Active Faculty</b><strong id="statActiveTeachers">38</strong></div>
+        <div class="stat blue clickable" data-go="timetable"><b>Active Lectures</b><strong id="totalClasses">300</strong></div>
+        <div class="stat orange clickable" data-go="substitute"><b>Today's Absences</b><strong id="absences">0</strong></div>
+        <div class="stat green clickable" data-go="reports"><b>Substitutions</b><strong id="subCount">0</strong></div>
+        <div class="stat pink clickable" data-go="reports"><b>Pending</b><strong>0</strong></div>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <h2>Active Cloud Substitutions Log</h2>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span class="tag ready">Live Sync</span>
+            <span class="tag" style="cursor:pointer" data-go="reports">Manage All →</span>
+          </div>
+        </div>
+        <div id="sublist"></div>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <h2>Faculty Workload <small style="color:var(--muted)">(Weekly Classes)</small></h2>
+          <span class="tag" style="cursor:pointer" data-go="teacherstatus">View All →</span>
+        </div>
+        <div class="chart" id="chart"></div>
+      </div>
+
+      <div class="card">
+        <div class="head"><h2>Quick Actions</h2></div>
+        <div class="quick">
+          <button data-go="substitute"><span>⚡</span>Find Substitute</button>
+          <button data-go="timetable"><span>▦</span>View Timetable</button>
+          <button data-go="directory"><span>📇</span>Faculty Numbers</button>
+          <button data-go="reports"><span>▥</span>Audit Reports</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="head"><h2>BCA Cohort Sections</h2><span class="tag">BCA ONLY</span></div>
+        <div class="sections">
+          <div class="section">
+            <b>2nd Year Cohort</b>
+            <div class="sl"><span>Section A</span><span>Section D</span><span>Section B</span><span>Section E</span><span>Section C</span><span>AI Section</span></div>
+          </div>
+          <div class="section">
+            <b>3rd Year Cohort</b>
+            <div class="sl"><span>Section A</span><span>AI Section</span><span>Section B</span><span>Section C</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SMART SUBSTITUTE -->
+    <section id="substitute" class="page">
+      <div class="card">
+        <div class="head">
+          <h2>⚡ Smart Substitute Finder</h2>
+          <span class="tag ready">DATE SPECIFIC • AUTO CONFLICT CHECK</span>
+        </div>
+        <div class="controls">
+          <div class="field">
+            <label>Target Date</label>
+            <input id="findDate" type="date">
+          </div>
+          <div class="field">
+            <label>Absent Faculty</label>
+            <select id="absentTeacher"></select>
+          </div>
+          <button class="primary" data-action="find-affected">Find Affected Classes</button>
+        </div>
+      </div>
+      <div id="affected"></div>
+    </section>
+
+    <!-- FACULTY STATUS -->
+    <section id="teacherstatus" class="page">
+      <div class="card">
+        <div class="head"><h2>👤 Live Faculty Schedule Status</h2><span class="tag ready">LIVE</span></div>
+        <div class="controls">
+          <div class="field">
+            <label>Select Faculty Member</label>
+            <select id="statusTeacher" data-action="teacher-status-changed"></select>
+          </div>
+        </div>
+      </div>
+      <div id="teacherStatusResult"></div>
+    </section>
+
+    <!-- DIRECTORY & CONTACTS (WITH S.NO) -->
+    <section id="directory" class="page">
+      <div class="card">
+        <div class="head"><h2>📇 Faculty Directory & Contact Numbers</h2><span class="tag">WHATSAPP & SMS READY</span></div>
+        <p class="editor-note" style="padding-top:12px">Add teacher WhatsApp numbers (with 91 country code) for 1-click notification dispatch.</p>
+        <div class="editor-grid">
+          <div><label>Faculty Name</label><select id="dirTeacherSelect" data-action="dir-select-changed"></select></div>
+          <div><label>WhatsApp / Phone Number</label><input id="dirPhone" placeholder="e.g. 919876543210"></div>
+          <div class="wide"><label>Email Address</label><input id="dirEmail" placeholder="faculty@university.edu"></div>
+        </div>
+        <div class="editor-buttons" style="grid-template-columns: 1fr 1fr;">
+          <button class="primary" data-action="save-contact">✓ Save Contact</button>
+          <button class="ghost" data-action="clear-contact">↺ Reset</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="head"><h2>📋 Saved Faculty Contacts List</h2></div>
+        <div style="overflow-x:auto">
+          <table class="dir-table">
+            <thead>
+              <tr><th>#</th><th>Faculty Name</th><th>Phone Number</th><th>Email</th><th>Action</th></tr>
+            </thead>
+            <tbody id="dirTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMETABLE -->
+    <section id="timetable" class="page">
+      <div class="card">
+        <div class="head"><h2>📅 Master BCA Timetable</h2><span class="tag">2026–27 ACADEMIC SESSION</span></div>
+        <div class="yeartabs">
+          <button class="tab active" id="y2" data-action="set-year" data-year="2">2nd Year</button>
+          <button class="tab" id="y3" data-action="set-year" data-year="3">3rd Year</button>
+        </div>
+        <div class="sectiontabs" id="sectionTabs"></div>
+        <div class="ttwrap">
+          <table class="tt">
+            <thead>
+              <tr>
+                <th>DAY</th>
+                <th>09:00–10:00</th>
+                <th>10:00–11:00</th>
+                <th>11:00–12:00</th>
+                <th>12:00–01:00</th>
+                <th>01:00–02:00</th>
+                <th>02:00–03:15</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card editor-card">
+        <div class="head"><h2>✏️ Edit / Add Class Slot</h2><span class="tag">ADMIN EDITOR</span></div>
+        <p class="editor-note">Tap <b>✎</b> on any cell in the table above to quickly edit that lecture slot.</p>
+        <div class="editor-grid">
+          <div><label>Year</label><select id="edYear" data-action="editor-year-changed"><option value="2">2nd Year</option><option value="3">3rd Year</option></select></div>
+          <div><label>Section</label><select id="edSection"></select></div>
+          <div><label>Day</label><select id="edDay"></select></div>
+          <div><label>Time Slot</label><select id="edSlot"></select></div>
+          <div class="wide"><label>Subject Title</label><input id="edSubject" placeholder="e.g. Data Structure"></div>
+          <div class="wide"><label>Faculty Name</label><input id="edTeacher" list="teacherOptions" placeholder="Faculty Name"><datalist id="teacherOptions"></datalist></div>
+          <div><label>Category</label><select id="edType"><option value="">Standard Lecture</option><option value="lab">Lab Session</option><option value="sub">TND / Special</option><option value="lunch">Lunch Break</option></select></div>
+        </div>
+        <div class="editor-buttons">
+          <button class="primary" data-action="save-lecture">✓ Save</button>
+          <button class="success" data-action="new-lecture">＋ Clear</button>
+          <button class="danger" data-action="delete-lecture">🗑 Delete</button>
+          <button class="ghost" data-action="reset-section">↺ Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTS & SUBSTITUTE ACTIONS -->
+    <section id="reports" class="page">
+      <div class="card">
+        <div class="head">
+          <h2>📊 Substitution Log & Management</h2>
+          <button class="primary" style="padding:7px 12px;font-size:10px" data-action="export-report">Export Log (.TXT)</button>
+        </div>
+        <div id="report"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="bottom">
+  <button class="active" data-go="dashboard"><span>⌂</span>Home</button>
+  <button data-go="substitute"><span>⚡</span>Substitute</button>
+  <button data-go="teacherstatus"><span>👤</span>Faculty</button>
+  <button data-go="directory"><span>📇</span>Directory</button>
+  <button data-go="timetable"><span>▦</span>Timetable</button>
+  <button data-go="reports"><span>▥</span>Reports</button>
+</nav>
+
+<script>
+/* ==================== EXACT FIREBASE CLOUD CONFIGURATION ==================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAzUh9YCm-sYqSSZqk8rWk4XO0mwn99bAs",
+  authDomain: "substitute-manager-7830a.firebaseapp.com",
+  projectId: "substitute-manager-7830a",
+  storageBucket: "substitute-manager-7830a.firebasestorage.app",
+  messagingSenderId: "505957728421",
+  appId: "1:505957728421:web:f898f84f53a17904bbcd4c",
+  measurementId: "G-S1YCVEMKNL"
+};
+
+let db = null;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  console.log("Firebase Firestore Live Connected");
+} catch(err) {
+  console.warn("Firestore offline fallback:", err);
+}
+
+/* Safe Offline Fallback Store */
+const memoryStore = {};
+function safeGet(key, fallback) {
+  try { const v = localStorage.getItem(key); return v === null ? fallback : v; }
+  catch(e) { return (key in memoryStore) ? memoryStore[key] : fallback; }
+}
+function safeSet(key, value) {
+  try { localStorage.setItem(key, value); }
+  catch(e) { memoryStore[key] = value; }
+}
+
+/* Realtime Cloud Listeners */
+let globalSubsList = [];
+function listenToCloudSubstitutes() {
+  if(!db) return;
+  db.collection("substitutions").onSnapshot((snapshot) => {
+    const list = [];
+    snapshot.forEach((doc) => {
+      list.push({ id: doc.id, ...doc.data() });
+    });
+    globalSubsList = list;
+    safeSet("bcaSubs", JSON.stringify(list));
+    renderReport();
+    updateDashboardSubCount();
+    updateDashboardSubList();
+  }, (err) => {
+    console.warn("Cloud listen error (working offline):", err);
+  });
+}
+
+function listenToCloudContacts() {
+  if(!db) return;
+  db.collection("faculty_contacts").onSnapshot((snapshot) => {
+    const contacts = getContacts();
+    snapshot.forEach((doc) => {
+      contacts[doc.id] = doc.data();
+    });
+    safeSet("bcaFacultyContacts", JSON.stringify(contacts));
+    renderDirectory();
+  }, (err) => {
+    console.warn("Cloud contacts listen error:", err);
+  });
+}
+
+/* Event Wiring */
+function wireEvents() {
+  document.addEventListener("click", function(e) {
+    const goEl = e.target.closest("[data-go]");
+    if(goEl) { go(goEl.getAttribute("data-go"), goEl.closest(".nav, .bottom button") ? goEl : null); return; }
+
+    const actionEl = e.target.closest("[data-action]");
+    if(!actionEl) return;
+    const action = actionEl.getAttribute("data-action");
+
+    if(action === "toggle-theme") { toggleTheme(); return; }
+    if(action === "find-affected") { findAffected(); return; }
+    if(action === "set-year") { setYear(Number(actionEl.getAttribute("data-year"))); return; }
+    if(action === "set-section") { setSection(actionEl.getAttribute("data-section")); return; }
+    if(action === "save-lecture") { saveLectureEdit(); return; }
+    if(action === "new-lecture") { newLecture(); return; }
+    if(action === "delete-lecture") { deleteLectureEdit(); return; }
+    if(action === "reset-section") { resetCurrentSection(); return; }
+    if(action === "export-report") { exportReport(); return; }
+    if(action === "edit-lecture") { editLecture(actionEl.getAttribute("data-day"), Number(actionEl.getAttribute("data-slot"))); return; }
+    if(action === "assign-index") { assignByIndex(Number(actionEl.getAttribute("data-index"))); return; }
+    if(action === "save-contact") { saveDirectoryContact(); return; }
+    if(action === "clear-contact") { clearDirectoryForm(); return; }
+    if(action === "edit-contact") { loadContactForEdit(actionEl.getAttribute("data-name")); return; }
+    if(action === "copy-msg") { copyTextToClipboard(decodeURIComponent(actionEl.getAttribute("data-msg"))); return; }
+    if(action === "delete-sub") { deleteSubstituteRecord(actionEl.getAttribute("data-id")); return; }
+    if(action === "change-sub") { changeSubstituteRecord(actionEl.getAttribute("data-id")); return; }
+  });
+
+  document.addEventListener("change", function(e) {
+    const el = e.target;
+    if(!el.getAttribute) return;
+    const action = el.getAttribute("data-action");
+    if(action === "editor-year-changed") { editorYearChanged(); return; }
+    if(action === "teacher-status-changed") { renderTeacherStatus(); return; }
+    if(action === "dir-select-changed") { loadDirectoryFormForSelected(); return; }
+  });
+}
+wireEvents();
+
+/* Theme Handling */
+function initTheme() {
+  const t = safeGet("bca_theme", "dark");
+  if(t === "light") { document.body.classList.add("light-theme"); updateThemeBtn(true); }
+  else { document.body.classList.remove("light-theme"); updateThemeBtn(false); }
+}
+function toggleTheme() {
+  const isLight = document.body.classList.toggle("light-theme");
+  safeSet("bca_theme", isLight ? "light" : "dark");
+  updateThemeBtn(isLight);
+}
+function updateThemeBtn(isLight) {
+  const b = document.getElementById("themeToggleBtn");
+  if(b) b.innerHTML = isLight ? "☀️ <span>Light Mode</span>" : "🌙 <span>Dark Mode</span>";
+}
+
+/* Master Timetable Data */
+const T = ["09:00–10:00","10:00–11:00","11:00–12:00","12:00–01:00","01:00–02:00","02:00–03:15"];
+const D = ["Mon","Tue","Wed","Thu","Fri","Sat"];
+const C = (s, t, type="") => ({ s, t, type });
+const L = () => ({ s: "LUNCH", t: "", type: "lunch" });
+
+const Y2 = {
+  A: [
+    [D[0], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("TND 2","Ms.Shifa Shakir","sub")],
+    [D[1], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
+    [D[2], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
+    [D[3], C("R.M","Jatin Patel"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi")],
+    [D[4], C("OOP's Using JAVA","Mohan Singh"), C("R.M","Jatin Patel"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("WD Lab","Aaryan Rastogi","lab"), C("DS Lab","Mr.Udit Kumar Mishra","lab")],
+    [D[5], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("R.M","Jatin Patel"), L(), C("TND 2","Ms.Shifa Shakir","sub"), C("OOPs JAVA Lab","Anil Kumar Sharma","lab")]
+  ],
+  B: [
+    [D[0], C("R.M","Jatin Patel"), C("WD","Raj Kumar Singh"), C("OOPs JAVA Lab","Roopesh Mishra","lab"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+    [D[1], C("OB","MA2"), C("R.M","Jatin Patel"), C("MIS","Aaryan Rastogi"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+    [D[2], C("TND 2","Ms.Shifa Shakir","sub"), C("WD","Raj Kumar Singh"), C("R.M","Jatin Patel"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+    [D[3], C("OB","MA2"), C("WD","Raj Kumar Singh"), C("TND 2","Ms.Shifa Shakir","sub"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+    [D[4], C("TND 2","Ms.Shifa Shakir","sub"), C("WD","Raj Kumar Singh"), C("MIS","Aaryan Rastogi"), L(), C("DS","Prem Prakash"), C("OOP's Using JAVA","Mohan Singh")],
+    [D[5], C("OB","MA2"), C("TND 2","Ms.Shifa Shakir","sub"), C("MIS","Aaryan Rastogi"), L(), C("WD Lab","Aaryan Rastogi","lab"), C("DS Lab","Mr.Udit Kumar Mishra","lab")]
+  ],
+  C: [
+    [D[0], C("MIS","Aaryan Rastogi"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("POM","MA2"), C("OOP's Using JAVA","Roopesh Mishra")],
+    [D[1], C("MIS","Aaryan Rastogi"), C("DS","Prem Prakash"), C("TND 3","Ms.Gagandeep Kaur","sub"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Roopesh Mishra")],
+    [D[2], C("TND 3","Ms.Gagandeep Kaur","sub"), C("DS","Prem Prakash"), C("OB","Sristhi Tripathi"), L(), C("POM","MA1"), C("OOP's Using JAVA","Roopesh Mishra")],
+    [D[3], C("MIS","Aaryan Rastogi"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("WD","Sudhanshu Ballabh"), L(), C("POM","Sristhi Tripathi"), C("OOP's Using JAVA","Roopesh Mishra")],
+    [D[4], C("TND 3","Ms.Gagandeep Kaur","sub"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("WD Lab","Raj Kumar Singh","lab"), C("DS Lab","Raj Kumar Singh","lab")],
+    [D[5], C("OB","Sristhi Tripathi"), C("DS","Prem Prakash"), C("WD","Sudhanshu Ballabh"), L(), C("OOPs JAVA Lab","Sachin Kumar","lab"), C("OOP's Using JAVA","Roopesh Mishra")]
+  ],
+  D: [
+    [D[0], C("DS","Roopesh Mishra"), C("WD","Sudhanshu Ballabh"), C("POM","Sristhi Tripathi"), L(), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's Using JAVA","Prem Prakash")],
+    [D[1], C("DS","Roopesh Mishra"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's using Jva Lab","Nikhil Rathore","lab"), L(), C("MIS","Ashutosh Bhatt"), C("OOP's Using JAVA","Prem Prakash")],
+    [D[2], C("DS","Roopesh Mishra"), C("POM","Sristhi Tripathi"), C("WD","Sudhanshu Ballabh"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
+    [D[3], C("DS","Roopesh Mishra"), C("WD","Sudhanshu Ballabh"), C("MIS","Ashutosh Bhatt"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
+    [D[4], C("DS","Roopesh Mishra"), C("MIS","Ashutosh Bhatt"), C("TND 3","Ms.Gagandeep Kaur","sub"), L(), C("OB","Sristhi Tripathi"), C("OOP's Using JAVA","Prem Prakash")],
+    [D[5], C("TND 3","Ms.Gagandeep Kaur","sub"), C("WD","Sudhanshu Ballabh"), C("POM","Sristhi Tripathi"), L(), C("WD Lab","Mohan Singh","lab"), C("DS Lab","Mohan Singh","lab")]
+  ],
+  E: [
+    [D[0], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("OB","Sristhi Tripathi")],
+    [D[1], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("TND 3","Ms.Gagandeep Kaur","sub")],
+    [D[2], C("R.M","Jatin Patel"), C("DS","Roopesh Mishra"), C("OOP's using Jva Lab","Nikhil Rathore","lab"), L(), C("WD","Aditya Tiwari"), C("TND 3","Ms.Gagandeep Kaur","sub")],
+    [D[3], C("MIS","Ashutosh Bhatt"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OB","Sristhi Tripathi")],
+    [D[4], C("R.M","Jatin Patel"), C("DS","Roopesh Mishra"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD Lab","Sachin Kumar","lab"), C("DS Lab","Dr.Abhishek","lab")],
+    [D[5], C("R.M","Jatin Patel"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("OOP's Using JAVA","Prem Prakash"), L(), C("WD","Aditya Tiwari"), C("OB","Sristhi Tripathi")]
+  ],
+  AI: [
+    [D[0], C("Digital Electronics","Nikhil Rathore"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("E-Commerce & Digital Marketing","MA2")],
+    [D[1], C("OB","Sristhi Tripathi"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("E-Commerce & Digital Marketing","MA2")],
+    [D[2], C("Digital Electronics","Nikhil Rathore"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("TND 4","Ms.Sukhman Kaur","sub")],
+    [D[3], C("TND 4","Ms.Sukhman Kaur","sub"), C("Advance Python Programming","Dr.Jeelani"), C("Advance Python Lab","Nikhil Rathore","lab"), L(), C("R.M / POM","Pankaj Kumr Tiwari"), C("E-Commerce & Digital Marketing","MA2")],
+    [D[4], C("R.M / POM","Pankaj Kumr Tiwari"), C("OB","Sristhi Tripathi"), C("WD Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")],
+    [D[5], C("Digital Electronics","Nikhil Rathore"), C("R.M / POM","Pankaj Kumr Tiwari"), C("DE Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")]
+  ]
+};
+
+const Y3 = {
+  A: [
+    [D[0], C("TND 4","Ms.Sukhman Kaur","sub"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic Lab","Sachin Kumar","lab"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
+    [D[1], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
+    [D[2], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Elective 2","Roopesh Mishra"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Aditya Tiwari")],
+    [D[3], C("Digital Electronic","Muskan"), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Mobile Application Development Lab","Anil Kumar Sharma","lab"), L(), C("Computer Architecture","Monin Kamran"), C("Mobile Application Development","Aditya Tiwari")],
+    [D[4], C("Digital Electronic","Muskan"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Machine Learning Fundamental","Madhuresh Yadav")],
+    [D[5], C("Digital Electronic","Muskan"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Elective 2","Roopesh Mishra"), L(), C("Computer Architecture","Monin Kamran"), C("Machine Learning Fundamental","Madhuresh Yadav")]
+  ],
+  B: [
+    [D[0], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("TND 4","Ms.Sukhman Kaur","sub")],
+    [D[1], C("Elective 2","Aditya Tiwari"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Digital Electronic Lab","Sachin Kumar","lab"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
+    [D[2], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
+    [D[3], C("Elective 2","Aditya Tiwari"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
+    [D[4], C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Moin Kamran"), C("Mobile Application Development Lab","Anil Kumar Sharma","lab"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")],
+    [D[5], C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Ashish Kumar"), C("Computer Architecture","Moin Kamran"), L(), C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Sachin Kumar")]
+  ],
+  C: [
+    [D[0], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Monin Kamran")],
+    [D[1], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("Computer Architecture","Monin Kamran")],
+    [D[2], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Digital Electronic Lab","Anil Kumar Sharma","lab"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
+    [D[3], C("Machine Learning Fundamental","Madhuresh Yadav"), C("TND 4","Ms.Sukhman Kaur","sub"), C("Mobile Application Development","Mohan Singh"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
+    [D[4], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development","Mohan Singh"), L(), C("Elective 2","Ashish Kumar"), C("Computer Architecture","Monin Kamran")],
+    [D[5], C("Machine Learning Fundamental","Madhuresh Yadav"), C("Digital Electronic","Nikhil Rathore"), C("Mobile Application Development Lab","Mohan Singh","lab"), L(), C("Elective 2","Ashish Kumar"), C("TND 4","Ms.Sukhman Kaur","sub")]
+  ],
+  AI: [
+    [D[0], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("DS Lab","Dr.Abhishek","lab"), L(), C("TND 1","Ms.Silki Setia","sub"), C("Elective 2","Ashish Kumar")],
+    [D[1], C("IPR","MA1"), C("TND 1","Ms.Silki Setia","sub"), C("DSc Lab","CA3","lab"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
+    [D[2], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("TND 1","Ms.Silki Setia","sub")],
+    [D[3], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
+    [D[4], C("IPR","MA1"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("Elective 2","Ashish Kumar")],
+    [D[5], C("Elective 2","Ashish Kumar"), C("Data Structure","Dr.Abhishek"), C("Mini Project","Dr.Jeelani"), L(), C("Data Science & Analytics","Udit Kumar Mishra"), C("TND 1","Ms.Silki Setia","sub")]
+  ]
+};
+
+let year = 2, section = "A";
+const all = () => year === 2 ? Y2 : Y3;
+
+function renderTabs() {
+  document.getElementById("sectionTabs").innerHTML = Object.keys(all()).map(s => 
+    `<button class="tab ${s === section ? "active" : ""}" data-action="set-section" data-section="${escapeHtml(s)}">${s === "AI" ? "AI Section" : "Section " + s}</button>`
+  ).join("");
+}
+
+function setYear(y) {
+  year = y;
+  section = Object.keys(all())[0];
+  document.getElementById("y2").classList.toggle("active", y === 2);
+  document.getElementById("y3").classList.toggle("active", y === 3);
+  renderTabs();
+  renderTable();
+}
+
+function setSection(s) {
+  section = s;
+  renderTabs();
+  renderTable();
+}
+
+function renderTable() {
+  const rows = all()[section] || [];
+  document.getElementById("tbody").innerHTML = rows.map(r => `
+    <tr>
+      <td class="day">${r[0]}</td>
+      ${r.slice(1).map((x, i) => x.type === "lunch" 
+        ? `<td class="lunch edit-cell" data-action="edit-lecture" data-day="${escapeHtml(r[0])}" data-slot="${i}"><span class="edit-mark">✎</span>LUNCH</td>`
+        : `<td class="${x.type === "lab" ? "lab" : ""} ${x.type === "sub" ? "tdsub" : ""} edit-cell" data-action="edit-lecture" data-day="${escapeHtml(r[0])}" data-slot="${i}">
+             <span class="edit-mark">✎</span>
+             <span class="subject">${escapeHtml(x.s) || "Unassigned"}</span>
+             <span class="teacher">${escapeHtml(x.t) || ""}</span>
+           </td>`
+      ).join("")}
+    </tr>
+  `).join("");
+  updateTeacherOptions();
+}
+
+/* Master Data Helpers */
+function getAllRowsWithYear() {
+  const res = [];
+  for(const [sec, rows] of Object.entries(Y2)) {
+    res.push({ year: 2, yearLabel: "2nd Year", sec, rows });
+  }
+  for(const [sec, rows] of Object.entries(Y3)) {
+    res.push({ year: 3, yearLabel: "3rd Year", sec, rows });
+  }
+  return res;
+}
+
+function teachers() {
+  const set = new Set();
+  getAllRowsWithYear().forEach(item => item.rows.forEach(r => r.slice(1).forEach(x => {
+    if(x.t && x.type !== "lunch") set.add(x.t);
+  })));
+  const extra = JSON.parse(safeGet("bcaExtraTeachers", "[]"));
+  extra.forEach(x => set.add(x));
+  return [...set].sort();
+}
+
+/* Editor Logic */
+function editorYearChanged() {
+  const y = Number(document.getElementById("edYear").value);
+  const secs = Object.keys(y === 2 ? Y2 : Y3);
+  document.getElementById("edSection").innerHTML = secs.map(x => `<option value="${x}">${x === "AI" ? "AI" : "Section " + x}</option>`).join("");
+}
+
+function initEditor() {
+  document.getElementById("edDay").innerHTML = D.map(x => `<option value="${x}">${x}</option>`).join("");
+  document.getElementById("edSlot").innerHTML = T.map((x, i) => `<option value="${i}">${x}</option>`).join("");
+  editorYearChanged();
+  document.getElementById("edYear").value = year;
+  document.getElementById("edSection").value = section;
+}
+
+function updateTeacherOptions() {
+  const list = document.getElementById("teacherOptions");
+  updateTeacherStatusDropdown();
+  if(!list) return;
+  list.innerHTML = teachers().map(x => `<option value="${escapeHtml(x)}"></option>`).join("");
+  renderDirectory();
+}
+
+function editLecture(day, slot) {
+  document.getElementById("edYear").value = year;
+  editorYearChanged();
+  document.getElementById("edSection").value = section;
+  document.getElementById("edDay").value = day;
+  document.getElementById("edSlot").value = slot;
+  const rows = (year === 2 ? Y2 : Y3)[section] || [];
+  const row = rows.find(r => r[0] === day);
+  const x = row ? row[slot + 1] : null;
+  document.getElementById("edSubject").value = x?.s === "LUNCH" ? "" : (x?.s || "");
+  document.getElementById("edTeacher").value = x?.t || "";
+  document.getElementById("edType").value = x?.type === "lunch" ? "lunch" : (x?.type || "");
+  document.querySelector(".editor-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function saveLectureEdit() {
+  const y = Number(document.getElementById("edYear").value);
+  const sec = document.getElementById("edSection").value;
+  const day = document.getElementById("edDay").value;
+  const slot = Number(document.getElementById("edSlot").value);
+  const s = document.getElementById("edSubject").value.trim();
+  let t = document.getElementById("edTeacher").value.trim();
+  const type = document.getElementById("edType").value;
+
+  if(!s && type !== "lunch") { alert("Please provide a subject title."); return; }
+  if(type === "lunch") t = "";
+
+  const rows = (y === 2 ? Y2 : Y3)[sec];
+  const row = rows?.find(r => r[0] === day);
+  if(row) row[slot + 1] = { s: type === "lunch" ? "LUNCH" : s, t, type };
+
+  year = y; section = sec;
+  renderTabs(); renderTable();
+  alert("✓ Timetable slot updated.");
+}
+
+function newLecture() {
+  document.getElementById("edSubject").value = "";
+  document.getElementById("edTeacher").value = "";
+  document.getElementById("edType").value = "";
+}
+
+function deleteLectureEdit() {
+  const y = Number(document.getElementById("edYear").value);
+  const sec = document.getElementById("edSection").value;
+  const day = document.getElementById("edDay").value;
+  const slot = Number(document.getElementById("edSlot").value);
+  const rows = (y === 2 ? Y2 : Y3)[sec];
+  const row = rows?.find(r => r[0] === day);
+  if(row) row[slot + 1] = { s: "", t: "", type: "" };
+  year = y; section = sec;
+  renderTabs(); renderTable();
+  alert("✓ Class slot cleared.");
+}
+
+function resetCurrentSection() {
+  const y = Number(document.getElementById("edYear").value);
+  const sec = document.getElementById("edSection").value;
+  const backup = JSON.parse(safeGet("bcaOriginalBackup", "{}"));
+  if(backup[y] && backup[y][sec]) {
+    (y === 2 ? Y2 : Y3)[sec] = backup[y][sec].map(r => r.map(x => typeof x === "object" ? { ...x } : x));
+    year = y; section = sec;
+    renderTabs(); renderTable();
+    alert("✓ Section restored.");
+  }
+}
+
+function backupOriginal() {
+  if(safeGet("bcaOriginalBackup", null)) return;
+  const clone = (obj) => JSON.parse(JSON.stringify(obj));
+  safeSet("bcaOriginalBackup", JSON.stringify({ 2: clone(Y2), 3: clone(Y3) }));
+}
+
+/* Faculty Directory */
+const DEFAULT_CONTACTS = {
+  "Mohan Singh": { phone: "919811122233", email: "mohan.singh@university.edu" },
+  "Sachin Kumar": { phone: "919822233344", email: "sachin.kumar@university.edu" },
+  "Roopesh Mishra": { phone: "919833344455", email: "roopesh.mishra@university.edu" },
+  "Aditya Tiwari": { phone: "919844455566", email: "aditya.tiwari@university.edu" },
+  "Madhuresh Yadav": { phone: "919855566677", email: "madhuresh.yadav@university.edu" },
+  "Anil Kumar Sharma": { phone: "919866677788", email: "anil.sharma@university.edu" },
+  "Dr.Jeelani": { phone: "919877788899", email: "dr.jeelani@university.edu" },
+  "Dr.Abhishek": { phone: "919888899900", email: "dr.abhishek@university.edu" }
+};
+
+function getContacts() {
+  return JSON.parse(safeGet("bcaFacultyContacts", JSON.stringify(DEFAULT_CONTACTS)));
+}
+
+function saveContact(name, phone, email) {
+  const c = getContacts();
+  c[name] = { phone: phone.trim(), email: email.trim() };
+  safeSet("bcaFacultyContacts", JSON.stringify(c));
+  if(db) {
+    db.collection("faculty_contacts").doc(name).set(c[name]).catch(console.warn);
+  }
+}
+
+function renderDirectory() {
+  const sel = document.getElementById("dirTeacherSelect");
+  if(sel) {
+    const prev = sel.value;
+    sel.innerHTML = teachers().map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+    if(prev) sel.value = prev;
+  }
+  loadDirectoryFormForSelected();
+
+  const tbody = document.getElementById("dirTableBody");
+  if(!tbody) return;
+  const contacts = getContacts();
+  const allT = teachers();
+
+  tbody.innerHTML = allT.map((t, idx) => {
+    const info = contacts[t] || { phone: "", email: "" };
+    return `
+      <tr>
+        <td><strong>${idx + 1}</strong></td>
+        <td><strong>${escapeHtml(t)}</strong></td>
+        <td>${info.phone ? escapeHtml(info.phone) : '<span style="color:var(--muted)">Not Set</span>'}</td>
+        <td>${info.email ? escapeHtml(info.email) : '<span style="color:var(--muted)">Not Set</span>'}</td>
+        <td><button class="primary" style="padding:4px 8px;font-size:9px" data-action="edit-contact" data-name="${escapeHtml(t)}">Edit</button></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function loadDirectoryFormForSelected() {
+  const sel = document.getElementById("dirTeacherSelect");
+  if(!sel) return;
+  const name = sel.value;
+  const contacts = getContacts();
+  const info = contacts[name] || { phone: "", email: "" };
+  document.getElementById("dirPhone").value = info.phone || "";
+  document.getElementById("dirEmail").value = info.email || "";
+}
+
+function loadContactForEdit(name) {
+  document.getElementById("dirTeacherSelect").value = name;
+  loadDirectoryFormForSelected();
+  document.getElementById("dirPhone").focus();
+}
+
+function saveDirectoryContact() {
+  const name = document.getElementById("dirTeacherSelect").value;
+  const phone = document.getElementById("dirPhone").value;
+  const email = document.getElementById("dirEmail").value;
+  if(!name) return;
+  saveContact(name, phone, email);
+  renderDirectory();
+  alert(`✓ Contact saved to cloud for ${name}`);
+}
+
+function clearDirectoryForm() {
+  document.getElementById("dirPhone").value = "";
+  document.getElementById("dirEmail").value = "";
+}
+
+/* Date-Specific Matching */
+function getDayNameFromDateStr(dateStr) {
+  if(!dateStr) return null;
+  const d = new Date(dateStr + "T00:00:00");
+  const dow = d.getDay();
+  if(dow === 0) return "Sun";
+  return D[dow - 1];
+}
+
+function calculateTeacherMatch(candidate, absent, day, slotIndex, targetSubject) {
+  if(teacherHasSlot(candidate, day, slotIndex)) {
+    return { score: 0, reason: "Busy in another class", available: false };
+  }
+  let score = 50;
+  let reason = "Free in this slot";
+  const candidateSubs = getSubjectsTaughtBy(candidate);
+  const isSimilar = candidateSubs.some(sub => isSubjectSimilar(sub, targetSubject));
+  if(isSimilar) { score += 35; reason = "Subject Specialist"; }
+  const todaysClasses = classesForTeacherOnDay(candidate, day).length;
+  if(todaysClasses === 0) { score += 13; if(!isSimilar) reason = "Completely Free Today"; }
+  else if(todaysClasses <= 2) { score += 8; if(!isSimilar) reason = "Light Workload Today"; }
+  return { score: Math.min(score, 98), reason, available: true };
+}
+
+function isSubjectSimilar(subA, subB) {
+  if(!subA || !subB) return false;
+  const a = subA.toLowerCase(), b = subB.toLowerCase();
+  if(a === b) return true;
+  const kws = ["java", "python", "ds", "data structure", "c++", "web", "wd", "digital", "ml", "mobile", "architecture", "mis", "ob", "pom", "rm", "tnd"];
+  return kws.some(k => a.includes(k) && b.includes(k));
+}
+
+function getSubjectsTaughtBy(name) {
+  const set = new Set();
+  getAllRowsWithYear().forEach(item => item.rows.forEach(r => r.slice(1).forEach(x => {
+    if(x.t === name && x.s && x.type !== "lunch") set.add(x.s);
+  })));
+  return [...set];
+}
+
+function teacherHasSlot(name, day, slotIndex) {
+  for(const item of getAllRowsWithYear()) {
+    for(const r of item.rows) {
+      if(r[0] === day && r[slotIndex + 1]?.t === name) return true;
+    }
+  }
+  return false;
+}
+
+let lastAffectedList = [], lastTargetDate = "", lastAbsentName = "";
+
+function findAffected() {
+  const name = document.getElementById("absentTeacher").value;
+  const dateVal = document.getElementById("findDate").value;
+  if(!name) { alert("Please select an absent faculty member."); return; }
+  if(!dateVal) { alert("Please choose a date."); return; }
+
+  const day = getDayNameFromDateStr(dateVal);
+  lastTargetDate = dateVal;
+  lastAbsentName = name;
+
+  if(day === "Sun") {
+    document.getElementById("affected").innerHTML = `
+      <div class="card">
+        <div class="head"><h2>${escapeHtml(name)} • Sunday</h2><span class="tag">0 Classes</span></div>
+        <div style="padding:16px;color:var(--muted);font-size:11px">Sunday is a scheduled college holiday. No substitution needed.</div>
+      </div>`;
+    return;
+  }
+
+  const affected = [];
+  getAllRowsWithYear().forEach(item => {
+    item.rows.forEach(r => {
+      if(r[0] !== day) return;
+      r.slice(1).forEach((x, i) => {
+        if(x.t === name && x.type !== "lunch") {
+          affected.push({
+            yearLabel: item.yearLabel,
+            sec: item.sec,
+            day: r[0],
+            slot: T[i],
+            slotIndex: i,
+            subject: x.s
+          });
+        }
+      });
+    });
+  });
+
+  lastAffectedList = affected;
+
+  if(affected.length === 0) {
+    document.getElementById("affected").innerHTML = `
+      <div class="card">
+        <div class="head"><h2>${escapeHtml(name)} • ${day} (${dateVal})</h2><span class="tag ready">0 Affected Classes</span></div>
+        <div style="padding:16px;color:var(--muted);font-size:11px">No classes scheduled for ${escapeHtml(name)} on ${day}.</div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById("affected").innerHTML = `
+    <div class="card">
+      <div class="head">
+        <h2>${escapeHtml(name)} • ${day} (${dateVal})</h2>
+        <span class="tag ready">${affected.length} Class(es) on this Date</span>
+      </div>
+      ${affected.map((x, i) => {
+        const rankedCandidates = teachers()
+          .filter(t => t !== name)
+          .map(cand => ({ name: cand, ...calculateTeacherMatch(cand, name, x.day, x.slotIndex, x.subject) }))
+          .sort((c1, c2) => c2.score - c1.score);
+
+        return `
+          <div class="sub" style="align-items:flex-start">
+            <div class="ok" style="margin-top:4px">⚡</div>
+            <div class="submain">
+              <b style="color:var(--p2)">${x.slot} • ${x.yearLabel} - ${x.sec === "AI" ? "AI Section" : "Section " + x.sec}</b>
+              <small>Subject: <strong>${escapeHtml(x.subject)}</strong> • Faculty: ${escapeHtml(name)}</small>
+              
+              <div style="margin-top:8px">
+                <label style="font-size:9px;color:var(--muted);font-weight:800;display:block;margin-bottom:3px">SELECT SUBSTITUTE (RANKED BY AI %):</label>
+                <select id="pick${i}" style="width:100%;background:var(--input-bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px">
+                  ${rankedCandidates.map(cand => `
+                    <option value="${escapeHtml(cand.name)}">
+                      ${cand.score >= 80 ? '⭐ ' : ''}${escapeHtml(cand.name)} — ${cand.score}% Match (${cand.reason})
+                    </option>
+                  `).join("")}
+                </select>
+              </div>
+
+              <div style="margin-top:8px">
+                <button class="primary" style="width:100%" data-action="assign-index" data-index="${i}">Assign & Send Notification</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function assignByIndex(i) {
+  const x = lastAffectedList[i];
+  if(!x) return;
+  const picked = document.getElementById("pick" + i);
+  const choice = picked ? picked.value : "";
+  if(!choice) { alert("Please select a substitute."); return; }
+  
+  const record = {
+    date: lastTargetDate,
+    absent: lastAbsentName,
+    day: x.day,
+    slot: x.slot,
+    yearLabel: x.yearLabel,
+    sec: x.sec,
+    subject: x.subject,
+    sub: choice,
+    createdAt: new Date().toISOString()
+  };
+
+  if(db) {
+    db.collection("substitutions").add(record).then(() => {
+      showNotificationDispatch(record);
+    }).catch((err) => {
+      console.warn("Offline assignment save:", err);
+      saveLocalSubstitute(record);
+    });
+  } else {
+    saveLocalSubstitute(record);
+  }
+}
+
+function saveLocalSubstitute(record) {
+  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
+  record.id = "sub_" + Date.now();
+  arr.push(record);
+  safeSet("bcaSubs", JSON.stringify(arr));
+  renderReport();
+  updateDashboardSubCount();
+  showNotificationDispatch(record);
+}
+
+function showNotificationDispatch(a) {
+  const contacts = getContacts();
+  const subContact = contacts[a.sub] || { phone: "", email: "" };
+  const message = `Hello ${a.sub}, you have been assigned as a substitute lecture for ${a.absent} on ${a.date} (${a.day}) during slot ${a.slot} for BCA ${a.yearLabel} ${a.sec === "AI" ? "AI Section" : "Section " + a.sec} (${a.subject}). Thank you!`;
+
+  const waLink = subContact.phone ? `https://wa.me/${subContact.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}` : null;
+  const smsLink = subContact.phone ? `sms:${subContact.phone.replace(/[^0-9]/g, '')}?body=${encodeURIComponent(message)}` : null;
+
+  const affectedBox = document.getElementById("affected");
+  if(affectedBox) {
+    const notifyHtml = `
+      <div class="card" style="border:2px solid var(--green);margin-bottom:14px">
+        <div class="head" style="background:rgba(16,185,129,0.1)">
+          <h2>✓ Substitute Assigned: <strong style="color:var(--green)">${escapeHtml(a.sub)}</strong></h2>
+          <span class="tag ready">CLOUD SAVED</span>
+        </div>
+        <div style="padding:14px">
+          <p style="margin:0 0 8px;font-size:11px"><strong>Class:</strong> ${a.yearLabel} ${a.sec === "AI" ? "AI" : "Sec " + a.sec} • ${escapeHtml(a.subject)} • ${a.slot}</p>
+          <div style="background:var(--input-bg);padding:10px;border-radius:8px;font-size:10px;border:1px solid var(--line);margin-bottom:10px">
+            "${escapeHtml(message)}"
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${waLink ? `<a href="${waLink}" target="_blank" class="notify-btn-wa">💬 Send WhatsApp</a>` : `<button class="ghost" data-go="directory" style="font-size:10px">⚠️ Add Phone Number</button>`}
+            ${smsLink ? `<a href="${smsLink}" class="notify-btn-sms">📱 Send SMS</a>` : ''}
+            <button class="primary" style="padding:7px 10px;font-size:10px" data-action="copy-msg" data-msg="${encodeURIComponent(message)}">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+    `;
+    affectedBox.insertAdjacentHTML("afterbegin", notifyHtml);
+  }
+}
+
+/* Faculty Status */
+function updateTeacherStatusDropdown() {
+  const sel = document.getElementById("statusTeacher");
+  if(!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = teachers().map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+  if(prev && teachers().includes(prev)) sel.value = prev;
+}
+
+function classesForTeacherOnDay(name, day) {
+  const out = [];
+  if(!day) return out;
+  getAllRowsWithYear().forEach(item => item.rows.forEach(r => {
+    if(r[0] !== day) return;
+    r.slice(1).forEach((x, i) => {
+      if(x.t === name && x.type !== "lunch") {
+        out.push({ yearLabel: item.yearLabel, sec: item.sec, slot: T[i], slotIndex: i, subject: x.s, type: x.type });
+      }
+    });
+  }));
+  out.sort((a, b) => a.slotIndex - b.slotIndex);
+  return out;
+}
+
+function renderTeacherStatus() {
+  const box = document.getElementById("teacherStatusResult");
+  if(!box) return;
+  const name = document.getElementById("statusTeacher")?.value;
+  if(!name) { box.innerHTML = `<div class="card"><div style="padding:16px;color:var(--muted)">Select a teacher above.</div></div>`; return; }
+
+  let weekly = 0;
+  getAllRowsWithYear().forEach(item => item.rows.forEach(r => r.slice(1).forEach(x => { if(x.t === name && x.type !== "lunch") weekly++; })));
+
+  const dow = new Date().getDay();
+  const day = dow === 0 ? null : D[dow - 1];
+  const todays = classesForTeacherOnDay(name, day);
+  const contacts = getContacts()[name] || { phone: "", email: "" };
+
+  const todayListHtml = todays.length ? todays.map(c => `
+    <div class="sub">
+      <div class="ok">▫</div>
+      <div class="submain">
+        <b>${c.slot} • ${c.yearLabel} - ${c.sec === "AI" ? "AI Section" : "Section " + c.sec}</b>
+        <small>${escapeHtml(c.subject)}</small>
+      </div>
+    </div>
+  `).join("") : `<div style="padding:16px;color:var(--muted);font-size:11px">No classes scheduled for today.</div>`;
+
+  box.innerHTML = `
+    <div class="stats" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="stat purple"><b>Weekly Lectures</b><strong>${weekly}</strong></div>
+      <div class="stat blue"><b>Today's Classes</b><strong>${todays.length}</strong></div>
+      <div class="stat green"><b>Phone</b><strong style="font-size:13px;margin-top:10px">${contacts.phone || "Not Set"}</strong></div>
+    </div>
+    <div class="card"><div class="head"><h2>📋 Today's Schedule Overview ${day ? "• " + day : ""}</h2></div>${todayListHtml}</div>
+  `;
+}
+
+/* Edit / Delete / Re-dispatch Cloud Substitute */
+function deleteSubstituteRecord(id) {
+  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
+  const item = arr.find(x => x.id === id);
+  if(!item) return;
+
+  if(confirm(`Are you sure you want to cancel the substitute assignment of ${item.sub} for ${item.subject}?`)) {
+    if(db && id && !id.startsWith("sub_")) {
+      db.collection("substitutions").doc(id).delete().catch(console.warn);
+    } else {
+      const idx = arr.findIndex(x => x.id === id);
+      if(idx !== -1) arr.splice(idx, 1);
+      safeSet("bcaSubs", JSON.stringify(arr));
+      renderReport();
+      updateDashboardSubCount();
+    }
+
+    const cancelMsg = `CANCELLATION NOTICE: The substitute lecture assigned to ${item.sub} for ${item.subject} on ${item.date} (${item.slot}, BCA ${item.yearLabel} ${item.sec}) has been CANCELLED.`;
+    const contacts = getContacts();
+    const phone = contacts[item.sub]?.phone;
+    const waLink = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(cancelMsg)}` : null;
+
+    alert("✓ Substitute removed from Cloud.");
+    if(waLink && confirm("Send Cancellation Notice to " + item.sub + " via WhatsApp?")) {
+      window.open(waLink, "_blank");
+    }
+  }
+}
+
+function changeSubstituteRecord(id) {
+  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
+  const item = arr.find(x => x.id === id);
+  if(!item) return;
+
+  const currentSub = item.sub;
+  const newSub = prompt(`Change substitute for ${item.subject} (${item.date}, ${item.slot}):\nEnter new faculty name:`, currentSub);
+  if(!newSub || newSub.trim() === "" || newSub === currentSub) return;
+
+  item.sub = newSub.trim();
+
+  if(db && id && !id.startsWith("sub_")) {
+    db.collection("substitutions").doc(id).update({ sub: item.sub }).catch(console.warn);
+  } else {
+    safeSet("bcaSubs", JSON.stringify(arr));
+    renderReport();
+  }
+
+  const updateMsg = `UPDATE: ${item.sub} has now been assigned as substitute for ${item.absent} on ${item.date} (${item.slot}) for BCA ${item.yearLabel} ${item.sec} (${item.subject}).`;
+  const contacts = getContacts();
+  const phone = contacts[item.sub]?.phone;
+  const waLink = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(updateMsg)}` : null;
+
+  alert("✓ Substitute updated to " + item.sub);
+  if(waLink && confirm("Send updated assignment to " + item.sub + " via WhatsApp?")) {
+    window.open(waLink, "_blank");
+  }
+}
+
+function renderReport() {
+  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
+  const reportBox = document.getElementById("report");
+  if(!reportBox) return;
+
+  const contacts = getContacts();
+
+  reportBox.innerHTML = arr.length ? arr.slice().reverse().map(x => {
+    const msg = `Substitute Notice: ${x.sub} takes ${x.subject} for ${x.absent} on ${x.date} (${x.slot}, BCA ${x.yearLabel} ${x.sec}).`;
+    const phone = contacts[x.sub]?.phone;
+    const waLink = phone ? `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}` : null;
+
+    return `
+      <div class="reportrow">
+        <b>${escapeHtml(x.date)} • ${escapeHtml(x.slot)} • ${escapeHtml(x.yearLabel)} - ${x.sec === "AI" ? "AI Section" : "Section " + escapeHtml(x.sec)}</b>
+        <small>
+          Subject: <strong>${escapeHtml(x.subject)}</strong><br>
+          Absent Faculty: <span style="color:var(--pink)">${escapeHtml(x.absent)}</span> ➔ Assigned: <strong style="color:var(--green)">${escapeHtml(x.sub)}</strong>
+        </small>
+        <div class="report-actions">
+          ${waLink ? `<a href="${waLink}" target="_blank" class="notify-btn-wa" style="padding:4px 8px;font-size:9px">💬 WhatsApp</a>` : ''}
+          <button class="primary" style="padding:4px 8px;font-size:9px" data-action="copy-msg" data-msg="${encodeURIComponent(msg)}">📋 Copy</button>
+          <button class="ghost" style="padding:4px 8px;font-size:9px;border-radius:6px" data-action="change-sub" data-id="${x.id}">✏️ Change</button>
+          <button class="danger" style="padding:4px 8px;font-size:9px;border-radius:6px" data-action="delete-sub" data-id="${x.id}">🗑 Delete</button>
+        </div>
+      </div>
+    `;
+  }).join("") : `<div style="padding:16px;color:var(--muted);font-size:11px">No substitution assignments recorded yet.</div>`;
+}
+
+function updateDashboardSubList() {
+  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
+  const sublist = document.getElementById("sublist");
+  if(!sublist) return;
+
+  sublist.innerHTML = arr.length ? arr.slice(-3).reverse().map(x => `
+    <div class="sub">
+      <div class="ok">✓</div>
+      <div class="submain">
+        <b>${x.slot} • ${x.yearLabel} ${x.sec}</b>
+        <small>${x.subject} • ${x.absent} ➔ <strong style="color:var(--green)">${x.sub}</strong></small>
+      </div>
+    </div>
+  `).join("") : `<div style="padding:14px;font-size:11px;color:var(--muted)">No active substitutions recorded.</div>`;
+}
+
+function exportReport() {
+  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
+  const text = "BCA DEPARTMENT - DAILY SUBSTITUTION AUDIT LOG\nGenerated: " + new Date().toLocaleString() + "\n===========================================================\n\n" +
+    (arr.length ? arr.map(x => `Date: ${x.date} | Day: ${x.day} | Slot: ${x.slot} | Cohort: ${x.yearLabel} ${x.sec} | Subject: ${x.subject}\nAbsent: ${x.absent} -> Substitute: ${x.sub}\n-----------------------------------------------------------`).join("\n") : "No records");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  a.download = "BCA_Substitution_Report.txt";
+  a.click();
+}
+
+function updateDashboardSubCount() {
+  const arr = JSON.parse(safeGet("bcaSubs", "[]"));
+  const el = document.getElementById("subCount");
+  if(el) el.textContent = arr.length;
+}
+
+function copyTextToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => alert("✓ Message copied to clipboard!")).catch(() => alert(text));
+}
+
+function go(id, btn) {
+  document.querySelectorAll(".page").forEach(x => x.classList.remove("active"));
+  const p = document.getElementById(id);
+  if(p) p.classList.add("active");
+  document.querySelectorAll(".nav, .bottom button").forEach(x => x.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+  if(id === "timetable") renderTable();
+  if(id === "teacherstatus") { updateTeacherStatusDropdown(); renderTeacherStatus(); }
+  if(id === "directory") renderDirectory();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function escapeHtml(str) {
+  return String(str == null ? "" : str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+/* Initialization Pipeline */
+function step(fn, label) {
+  try { fn(); } catch(e) { console.error("Init Error at " + label, e); }
+}
+
+step(() => initTheme(), "initTheme");
+step(() => backupOriginal(), "backupOriginal");
+step(() => initEditor(), "initEditor");
+step(() => renderTabs(), "renderTabs");
+step(() => renderTable(), "renderTable");
+step(() => renderReport(), "renderReport");
+step(() => renderDirectory(), "renderDirectory");
+step(() => listenToCloudSubstitutes(), "listenToCloudSubstitutes");
+step(() => listenToCloudContacts(), "listenToCloudContacts");
+
+step(() => {
+  const d = new Date();
+  document.getElementById("today").textContent = d.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
+  const dp = document.getElementById("findDate");
+  if(dp) dp.valueAsDate = d;
+}, "dateSetup");
+
+step(() => {
+  const fac = teachers();
+  document.getElementById("statActiveTeachers").textContent = fac.length;
+  document.getElementById("absentTeacher").innerHTML = fac.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
+  updateTeacherStatusDropdown();
+}, "dropdowns");
+
+step(() => {
+  let count = 0;
+  getAllRowsWithYear().forEach(item => {
+    item.rows.forEach(r => {
+      r.slice(1).forEach(x => { if(x.s && x.type !== "lunch") count++; });
+    });
+  });
+  document.getElementById("totalClasses").textContent = count;
+  updateDashboardSubCount();
+}, "stats");
+
+step(() => {
+  const wl = {};
+  teachers().forEach(t => wl[t] = 0);
+  getAllRowsWithYear().forEach(item => item.rows.forEach(r => r.slice(1).forEach(x => { if(x.t) wl[x.t]++; })));
+  const top = Object.entries(wl).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  document.getElementById("chart").innerHTML = top.map(([n, v]) => `
+    <div class="bw">
+      <em>${v}</em>
+      <div class="bar" style="height:${Math.max(26, v * 14)}px"></div>
+      <div class="bn">${escapeHtml(n).split(" ")[0]}</div>
+    </div>
+  `).join("");
+}, "chart");
+</script>
+</body>
+</html>
