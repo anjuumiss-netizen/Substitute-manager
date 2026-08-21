@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>BCA Smart Dynamic Timetable & Cloud Manager</title>
 
+<!-- PWA & Mobile Meta Tags -->
+<meta name="theme-color" content="#080d18">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Smart Timetable">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+
 <!-- Firebase SDKs (Compat Version) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -480,7 +488,7 @@ button { cursor: pointer; }
 body:not(.is-admin) .admin-only { display: none !important; }
 body.is-admin .guest-only { display: none !important; }
 
-/* Clean Auth Modal (Zero Hints) */
+/* Clean Auth Modal */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -565,7 +573,7 @@ body.is-admin .guest-only { display: none !important; }
   </div>
 </header>
 
-<!-- SECURE ADMIN PIN MODAL (CLEAN - ZERO HINTS) -->
+<!-- SECURE ADMIN PIN MODAL -->
 <div class="modal-overlay" id="authModal">
   <div class="modal-card">
     <h2 style="margin:0 0 8px;font-size:16px" id="modalTitle">🔐 Admin Access</h2>
@@ -843,7 +851,7 @@ body.is-admin .guest-only { display: none !important; }
   </main>
 </div>
 
-<!-- BOTTOM NAVIGATION BAR (Auto-adjusts for Guest vs Admin) -->
+<!-- BOTTOM NAVIGATION BAR -->
 <nav class="bottom">
   <button class="active" data-go="dashboard"><span>⌂</span>Home</button>
   <button data-go="substitute"><span>⚡</span>Substitute</button>
@@ -912,11 +920,70 @@ const DEFAULT_TEACHERS = [
   "Aaryan Rastogi", "Jatin Patel", "Mr.Udit Kumar Mishra", "Anil Kumar Sharma",
   "Roopesh Mishra", "Prem Prakash", "Sudhanshu Ballabh", "Ms.Gagandeep Kaur",
   "Sristhi Tripathi", "MA1", "Ashutosh Bhatt", "Nikhil Rathore", "Dr.Abhishek",
-  "Dr.Jeelani", "Madhuresh Yadav", "Ms.Sukhman Kaur", "Pankaj Kumr Tiwari",
-  "Muskan", "Monin Kamran", "Aditya Tiwari", "Ashish Kumar", "Moin Kamran", "Ms.Silki Setia", "CA3", "Udit Kumar Mishra"
+  "Dr.Jeelani", "Madhuresh Yadav", "Ms.Sukhman Kaur", "Pankaj Kumar Tiwari",
+  "Muskan", "Monin Kamran", "Aditya Tiwari", "Ashish Kumar", "Moin Kamran", "Ms.Silki Setia", "CA3", "Udit Kumar Mishra",
+  "Ankit Pandey", "CA8", "CA10", "Kamlesh Prajapati", "Lal Krishan Parasari", "Neharika Agarwal"
 ];
 
 const DEFAULT_TIMETABLE_DATA = {
+  "1st Year": {
+    "Section A": [
+      [D[0], C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("CFET","Udit Kumar Mishra"), C("PPS Using C","Dr.Abhishek"), L(), C("Office Automation Lab","Nikhil Rathore","lab"), C("Office Automation Lab","Nikhil Rathore","lab")],
+      [D[1], C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("CFET","Udit Kumar Mishra"), C("PPS Using C","Dr.Abhishek"), C("",""), C("AI For Everyone","Muskan"), C("TND 1","Ms.Silki Setia","sub")],
+      [D[2], C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("CFET","Udit Kumar Mishra"), C("PPS Using C","Dr.Abhishek"), C("",""), C("AI For Everyone","Muskan"), C("PPS Using C Lab","CA8","lab")],
+      [D[3], C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("CFET","Udit Kumar Mishra"), C("PPS Using C","Dr.Abhishek"), C("",""), C("AI For Everyone","Muskan"), C("TND 1","Ms.Silki Setia","sub")],
+      [D[4], C("TND 1","Ms.Silki Setia","sub"), C("CFET","Udit Kumar Mishra"), C("PPS Using C","Dr.Abhishek"), C("",""), C("AI For Everyone","Muskan"), C("Mathematics Foundation","Pankaj Kumar Tiwari")],
+      [D[5], C("TND 1","Ms.Silki Setia","sub"), C("CFET","Udit Kumar Mishra"), C("PPS Using C","Dr.Abhishek"), C("",""), C("AI For Everyone","Muskan"), C("PPS Using C Lab","CA8","lab")],
+    ],
+    "Section B": [
+      [D[0], C("PPS Using C","Udit Kumar Mishra"), C("CFET","Ashutosh Bhatt"), C("Mathematics Foundation","Pankaj Kumar Tiwari"), L(), C("Office Automation Lab","CA8","lab"), C("Office Automation Lab","CA8","lab")],
+      [D[1], C("PPS Using C","Udit Kumar Mishra"), C("CFET","Ashutosh Bhatt"), C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("",""), C("TND 1","Ms.Silki Setia","sub"), C("AI For Everyone","Lal Krishan Parasari")],
+      [D[2], C("PPS Using C","Udit Kumar Mishra"), C("CFET","Ashutosh Bhatt"), C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("",""), C("PPS Using C Lab","Ankit Pandey","lab"), C("PPS Using C Lab","Anil Kumar Sharma","lab")],
+      [D[3], C("PPS Using C","Udit Kumar Mishra"), C("CFET","Ashutosh Bhatt"), C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("",""), C("TND 1","Ms.Silki Setia","sub"), C("AI For Everyone","Lal Krishan Parasari")],
+      [D[4], C("PPS Using C","Udit Kumar Mishra"), C("AI For Everyone","Lal Krishan Parasari"), C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("",""), C("TND 1","Ms.Silki Setia","sub"), C("CFET","Ashutosh Bhatt")],
+      [D[5], C("PPS Using C","Udit Kumar Mishra"), C("AI For Everyone","Lal Krishan Parasari"), C("Mathematics Foundation","Pankaj Kumar Tiwari"), C("",""), C("TND 1","Ms.Silki Setia","sub"), C("CFET","Ashutosh Bhatt")],
+    ],
+    "Section C": [
+      [D[0], C("CFET","Kamlesh Prajapati"), C("PPS Using C","Aaryan Rastogi"), C("Mathematics Foundation","Jatin Patel"), L(), C("Office Automation Lab","Aaryan Rastogi","lab"), C("Office Automation Lab","Lal Krishan Parasari","lab")],
+      [D[1], C("CFET","Kamlesh Prajapati"), C("PPS Using C","Aaryan Rastogi"), C("Mathematics Foundation","Jatin Patel"), C("",""), C("AI For Everyone","Nikhil Rathore"), C("TND 2","Ms.Shifa Shakir","sub")],
+      [D[2], C("CFET","Kamlesh Prajapati"), C("PPS Using C","Aaryan Rastogi"), C("TND 2","Ms.Shifa Shakir","sub"), C("",""), C("PPS Using C Lab","Aaryan Rastogi","lab"), C("PPS Using C Lab","Lal Krishan Parasari","lab")],
+      [D[3], C("CFET","Kamlesh Prajapati"), C("PPS Using C","Aaryan Rastogi"), C("Mathematics Foundation","Jatin Patel"), C("",""), C("AI For Everyone","Nikhil Rathore"), C("TND 2","Ms.Shifa Shakir","sub")],
+      [D[4], C("CFET","Kamlesh Prajapati"), C("PPS Using C","Aaryan Rastogi"), C("Mathematics Foundation","Jatin Patel"), C("",""), C("AI For Everyone","Nikhil Rathore"), C("Mathematics Foundation","Jatin Patel")],
+      [D[5], C("TND 2","Ms.Shifa Shakir","sub"), C("PPS Using C","Aaryan Rastogi"), C("AI For Everyone","Nikhil Rathore"), C("",""), C("AI For Everyone","Nikhil Rathore"), C("Mathematics Foundation","Jatin Patel")],
+    ],
+    "Section D": [
+      [D[0], C("PPS Using C","Raj Kumar Singh"), C("Mathematics Foundation","Neharika Agarwal"), C("TND 1","Ms.Silki Setia","sub"), L(), C("AI For Everyone","Lal Krishan Parasari"), C("CFET","Ankit Pandey")],
+      [D[1], C("TND 1","Ms.Silki Setia","sub"), C("AI For Everyone","Lal Krishan Parasari"), C("PPS Using C","Raj Kumar Singh"), C("",""), C("Office Automation Lab","CA8","lab"), C("Office Automation Lab","CA8","lab")],
+      [D[2], C("PPS Using C","Raj Kumar Singh"), C("Mathematics Foundation","Neharika Agarwal"), C("TND 1","Ms.Silki Setia","sub"), C("",""), C("AI For Everyone","Lal Krishan Parasari"), C("CFET","Ankit Pandey")],
+      [D[3], C("TND 1","Ms.Silki Setia","sub"), C("AI For Everyone","Lal Krishan Parasari"), C("PPS Using C","Raj Kumar Singh"), C("",""), C("PPS Using C Lab","Ankit Pandey","lab"), C("PPS Using C Lab","Ankit Pandey","lab")],
+      [D[4], C("PPS Using C","Raj Kumar Singh"), C("Mathematics Foundation","Neharika Agarwal"), C("AI For Everyone","Lal Krishan Parasari"), C("",""), C("Mathematics Foundation","Neharika Agarwal"), C("CFET","Ankit Pandey")],
+      [D[5], C("PPS Using C","Raj Kumar Singh"), C("Mathematics Foundation","Neharika Agarwal"), C("AI For Everyone","Lal Krishan Parasari"), C("",""), C("Mathematics Foundation","Neharika Agarwal"), C("CFET","Ankit Pandey")],
+    ],
+    "Section E": [
+      [D[0], C("PPS Using C","Sachin Kumar"), C("Office Automation Lab","Muskan","lab"), C("AI For Everyone","Ankit Pandey"), L(), C("Mathematics Foundation","Jatin Patel"), C("CFET","Muskan")],
+      [D[1], C("PPS Using C","Sachin Kumar"), C("Office Automation Lab","Muskan","lab"), C("AI For Everyone","Ankit Pandey"), C("",""), C("Mathematics Foundation","Jatin Patel"), C("CFET","Muskan")],
+      [D[2], C("PPS Using C","Sachin Kumar"), C("TND 1","Ms.Silki Setia","sub"), C("AI For Everyone","Ankit Pandey"), C("",""), C("Mathematics Foundation","Jatin Patel"), C("CFET","Muskan")],
+      [D[3], C("PPS Using C","Sachin Kumar"), C("PPS Using C Lab","CA10","lab"), C("TND 1","Ms.Silki Setia","sub"), C("",""), C("Mathematics Foundation","Jatin Patel"), C("CFET","Muskan")],
+      [D[4], C("PPS Using C","Sachin Kumar"), C("PPS Using C Lab","CA10","lab"), C("TND 1","Ms.Silki Setia","sub"), C("",""), C("Mathematics Foundation","Jatin Patel"), C("CFET","Muskan")],
+      [D[5], C("PPS Using C","Sachin Kumar"), C("TND 1","Ms.Silki Setia","sub"), C("AI For Everyone","Ankit Pandey"), C("",""), C("Mathematics Foundation","Jatin Patel"), C("CFET","Muskan")],
+    ],
+    "Section F": [
+      [D[0], C("PPS Using C","Ashish Kumar"), C("TND 2","Ms.Shifa Shakir","sub"), C("Mathematics Foundation","Neharika Agarwal"), L(), C("PPS Using C Lab","Ankit Pandey","lab"), C("AI For Everyone","CA10")],
+      [D[1], C("PPS Using C","Ashish Kumar"), C("PPS Using C Lab","CA10","lab"), C("Mathematics Foundation","Neharika Agarwal"), C("",""), C("CFET","Lal Krishan Parasari"), C("AI For Everyone","CA10")],
+      [D[2], C("PPS Using C","Ashish Kumar"), C("CFET","Lal Krishan Parasari"), C("Mathematics Foundation","Neharika Agarwal"), C("",""), C("CFET","Ashutosh Bhatt"), C("AI For Everyone","CA10")],
+      [D[3], C("PPS Using C","Ashish Kumar"), C("TND 2","Ms.Shifa Shakir","sub"), C("Mathematics Foundation","Neharika Agarwal"), C("",""), C("CFET","Lal Krishan Parasari"), C("AI For Everyone","CA10")],
+      [D[4], C("PPS Using C","Ashish Kumar"), C("Office Automation Lab","Muskan","lab"), C("Mathematics Foundation","Neharika Agarwal"), C("",""), C("TND 2","Ms.Shifa Shakir","sub"), C("AI For Everyone","CA10")],
+      [D[5], C("AI For Everyone","CA10"), C("Office Automation Lab","Muskan","lab"), C("TND 2","Ms.Shifa Shakir","sub"), C("",""), C("CFET","Lal Krishan Parasari"), C("AI For Everyone","CA10")],
+    ],
+    "AI Section": [
+      [D[0], C("Maths Foundation For AI","Neharika Agarwal"), C("PPS Using C","Anil Kumar Sharma"), C("TND 3","Ms.Gagandeep Kaur","sub"), L(), C("PPS Using C","Anil Kumar Sharma"), C("Python Programming","Dr.Jeelani")],
+      [D[1], C("Maths Foundation For AI","Neharika Agarwal"), C("CFET","Ashish Kumar"), C("Python Programming","Dr.Jeelani"), C("",""), C("Office Automation Lab","Ankit Pandey","lab"), C("Office Automation Lab","Ashutosh Bhatt","lab")],
+      [D[2], C("Maths Foundation For AI","Neharika Agarwal"), C("PPS Using C","Anil Kumar Sharma"), C("TND 3","Ms.Gagandeep Kaur","sub"), C("",""), C("PPS Using C","Anil Kumar Sharma"), C("Python Programming","Dr.Jeelani")],
+      [D[3], C("Python Programming","Dr.Jeelani"), C("Maths Foundation For AI","Neharika Agarwal"), C("CFET","Ashish Kumar"), C("",""), C("PPS Using C Lab","Dr.Abhishek","lab"), C("PPS Using C Lab","Dr.Abhishek","lab")],
+      [D[4], C("Maths Foundation For AI","Neharika Agarwal"), C("PPS Using C","Anil Kumar Sharma"), C("CFET","Ashish Kumar"), C("",""), C("TND 3","Ms.Gagandeep Kaur","sub"), C("Python Programming","Dr.Jeelani")],
+      [D[5], C("Maths Foundation For AI","Neharika Agarwal"), C("PPS Using C","Anil Kumar Sharma"), C("CFET","Ashish Kumar"), C("",""), C("TND 3","Ms.Gagandeep Kaur","sub"), C("Python Programming","Dr.Jeelani")],
+    ]
+  },
   "2nd Year": {
     "Section A": [
       [D[0], C("OOP's Using JAVA","Mohan Singh"), C("DS Using C","Sachin Kumar"), C("OB","MA2"), L(), C("WD","Raj Kumar Singh"), C("TND 2","Ms.Shifa Shakir","sub")],
@@ -962,9 +1029,9 @@ const DEFAULT_TIMETABLE_DATA = {
       [D[0], C("Digital Electronics","Nikhil Rathore"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("E-Commerce & Digital Marketing","MA2")],
       [D[1], C("OB","Sristhi Tripathi"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("E-Commerce & Digital Marketing","MA2")],
       [D[2], C("Digital Electronics","Nikhil Rathore"), C("Advance Python Programming","Dr.Jeelani"), C("WD Using Python","Aditya Tiwari"), L(), C("OS UNIX & SHELL Programming","Mohan Singh"), C("TND 4","Ms.Sukhman Kaur","sub")],
-      [D[3], C("TND 4","Ms.Sukhman Kaur","sub"), C("Advance Python Programming","Dr.Jeelani"), C("Advance Python Lab","Nikhil Rathore","lab"), L(), C("R.M / POM","Pankaj Kumr Tiwari"), C("E-Commerce & Digital Marketing","MA2")],
-      [D[4], C("R.M / POM","Pankaj Kumr Tiwari"), C("OB","Sristhi Tripathi"), C("WD Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")],
-      [D[5], C("Digital Electronics","Nikhil Rathore"), C("R.M / POM","Pankaj Kumr Tiwari"), C("DE Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")]
+      [D[3], C("TND 4","Ms.Sukhman Kaur","sub"), C("Advance Python Programming","Dr.Jeelani"), C("Advance Python Lab","Nikhil Rathore","lab"), L(), C("R.M / POM","Pankaj Kumar Tiwari"), C("E-Commerce & Digital Marketing","MA2")],
+      [D[4], C("R.M / POM","Pankaj Kumar Tiwari"), C("OB","Sristhi Tripathi"), C("WD Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")],
+      [D[5], C("Digital Electronics","Nikhil Rathore"), C("R.M / POM","Pankaj Kumar Tiwari"), C("DE Lab","Madhuresh Yadav","lab"), L(), C("TND 4","Ms.Sukhman Kaur","sub"), C("WD Using Python","Aditya Tiwari")]
     ]
   },
   "3rd Year": {
@@ -1005,6 +1072,24 @@ const DEFAULT_TIMETABLE_DATA = {
 
 let currentTimetable = JSON.parse(safeGet("bcaCloudTimetable", JSON.stringify(DEFAULT_TIMETABLE_DATA)));
 let currentFacultyList = JSON.parse(safeGet("bcaCloudTeachers", JSON.stringify(DEFAULT_TEACHERS)));
+
+/* Migration: if this device/cloud already had saved timetable data from before
+   "1st Year" existed, merge the new 1st Year section in without touching any
+   saved 2nd/3rd Year edits. Also add any new faculty names that weren't in
+   the old cached faculty list yet. */
+(function migrateAddFirstYear() {
+  let changed = false;
+  if(!currentTimetable["1st Year"] && DEFAULT_TIMETABLE_DATA["1st Year"]) {
+    currentTimetable = { "1st Year": DEFAULT_TIMETABLE_DATA["1st Year"], ...currentTimetable };
+    changed = true;
+  }
+  DEFAULT_TEACHERS.forEach(t => { if(!currentFacultyList.includes(t)) { currentFacultyList.push(t); changed = true; } });
+  if(changed) {
+    safeSet("bcaCloudTimetable", JSON.stringify(currentTimetable));
+    safeSet("bcaCloudTeachers", JSON.stringify(currentFacultyList));
+  }
+})();
+
 let activeYear = Object.keys(currentTimetable)[0] || "2nd Year";
 let activeSection = Object.keys(currentTimetable[activeYear] || {})[0] || "Section A";
 
@@ -1014,12 +1099,18 @@ function listenToCloudMasterData() {
   db.collection("academic_data").doc("master_config").onSnapshot((doc) => {
     if(doc.exists) {
       const data = doc.data();
+      let migrated = false;
       if(data.timetable) {
         currentTimetable = data.timetable;
+        if(!currentTimetable["1st Year"] && DEFAULT_TIMETABLE_DATA["1st Year"]) {
+          currentTimetable = { "1st Year": DEFAULT_TIMETABLE_DATA["1st Year"], ...currentTimetable };
+          migrated = true;
+        }
         safeSet("bcaCloudTimetable", JSON.stringify(currentTimetable));
       }
       if(data.teachers) {
         currentFacultyList = data.teachers;
+        DEFAULT_TEACHERS.forEach(t => { if(!currentFacultyList.includes(t)) { currentFacultyList.push(t); migrated = true; } });
         safeSet("bcaCloudTeachers", JSON.stringify(currentFacultyList));
       }
       if(data.adminPin) {
@@ -1027,6 +1118,7 @@ function listenToCloudMasterData() {
         safeSet("bcaAdminPin", cloudMasterPin);
       }
       refreshAllUI();
+      if(migrated && isAdmin) saveMasterDataToCloud();
     } else {
       saveMasterDataToCloud();
     }
@@ -1275,7 +1367,7 @@ function renderTable() {
   `).join("");
 }
 
-/* Timetable Editor (Instant Cloud Sync) */
+/* Timetable Editor */
 function initEditorDropdowns() {
   document.getElementById("edDay").innerHTML = D.map(x => `<option value="${x}">${x}</option>`).join("");
   document.getElementById("edSlot").innerHTML = T.map((x, i) => `<option value="${i}">${x}</option>`).join("");
@@ -1366,7 +1458,7 @@ function deleteLectureEdit() {
   }
 }
 
-/* ==================== ACADEMIC MANAGEMENT (TEACHERS, YEARS, SECTIONS) ==================== */
+/* Academic Management */
 function addTeacher() {
   if(!isAdmin) { openAuthModal(); return; }
   const name = document.getElementById("newTeacherName").value.trim();
@@ -1406,7 +1498,6 @@ function addYear() {
   if(!yName) { alert("Please enter Year/Semester name."); return; }
   if(currentTimetable[yName]) { alert("This Year/Semester already exists."); return; }
 
-  // Auto-generate standard 6-day timetable with Lunch in middle
   currentTimetable[yName] = {
     [initSec]: createEmptyGrid()
   };
@@ -1564,7 +1655,7 @@ function updateStatsAndCharts() {
   }
 }
 
-/* Directory Contacts (Admin Accessible Only) */
+/* Directory Contacts */
 const DEFAULT_CONTACTS = {
   "Mohan Singh": { phone: "919811122233", email: "mohan.singh@university.edu" },
   "Sachin Kumar": { phone: "919822233344", email: "sachin.kumar@university.edu" }
@@ -1631,9 +1722,49 @@ function getDayNameFromDateStr(dateStr) {
   return dow === 0 ? "Sun" : D[dow - 1];
 }
 
-function calculateTeacherMatch(candidate, absent, day, slotIndex) {
-  if(teacherHasSlot(candidate, day, slotIndex)) return { score: 0, reason: "Busy in another class" };
-  return { score: 85, reason: "Free in this slot" };
+function candidateSubjectsFor(name) {
+  const set = new Set();
+  for(const y in currentTimetable) {
+    for(const s in currentTimetable[y]) {
+      currentTimetable[y][s].forEach(r => r.slice(1).forEach(x => {
+        if(x.t === name && x.type !== "lunch" && x.s) set.add(x.s.toLowerCase());
+      }));
+    }
+  }
+  return set;
+}
+
+function candidateWorkloadOnDay(name, day) {
+  let c = 0;
+  for(const y in currentTimetable) {
+    for(const s in currentTimetable[y]) {
+      currentTimetable[y][s].forEach(r => {
+        if(r[0] !== day) return;
+        r.slice(1).forEach(x => { if(x.t === name && x.type !== "lunch") c++; });
+      });
+    }
+  }
+  return c;
+}
+
+function calculateTeacherMatch(candidate, absent, day, slotIndex, subject) {
+  if(teacherHasSlot(candidate, day, slotIndex)) return { score: 0, available: false, reason: "Busy in another class" };
+  let score = 10; // baseline: confirmed free at this slot, no clash
+  const subjSet = candidateSubjectsFor(candidate);
+  const subjLower = (subject || "").toLowerCase();
+  if(subjSet.has(subjLower)) {
+    score += 65; // teaches this exact subject elsewhere — most important factor
+  } else {
+    const words = subjLower.split(/\s+/).filter(w => w.length > 3);
+    const partial = [...subjSet].some(cs => words.some(w => cs.includes(w)));
+    if(partial) score += 30; // teaches a related subject
+  }
+  const load = candidateWorkloadOnDay(candidate, day);
+  const maxLoad = 6;
+  score += Math.round(25 * (1 - Math.min(load, maxLoad) / maxLoad)); // lighter workload today = fresher/more available
+  score = Math.max(0, Math.min(100, score));
+  const reason = score >= 70 ? "Best Match" : score >= 45 ? "Good Match" : "Available";
+  return { score, available: true, reason };
 }
 
 function teacherHasSlot(name, day, slotIndex) {
@@ -1688,7 +1819,7 @@ function findAffected() {
     <div class="card">
       <div class="head"><h2>${escapeHtml(name)} • ${day} (${dateVal})</h2><span class="tag ready">${affected.length} Class(es)</span></div>
       ${affected.map((x, i) => {
-        const candidates = currentFacultyList.filter(t => t !== name).map(cand => ({ name: cand, ...calculateTeacherMatch(cand, name, x.day, x.slotIndex) })).sort((a, b) => b.score - a.score);
+        const candidates = currentFacultyList.filter(t => t !== name).map(cand => ({ name: cand, ...calculateTeacherMatch(cand, name, x.day, x.slotIndex, x.subject) })).filter(c => c.available).sort((a, b) => b.score - a.score);
         return `
           <div class="sub" style="align-items:flex-start">
             <div class="ok" style="margin-top:4px">⚡</div>
@@ -1697,7 +1828,7 @@ function findAffected() {
               <small>Subject: <strong>${escapeHtml(x.subject)}</strong></small>
               <div style="margin-top:8px">
                 <select id="pick${i}" style="width:100%;background:var(--input-bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px">
-                  ${candidates.map(cand => `<option value="${escapeHtml(cand.name)}">${cand.score > 0 ? '⭐ ' : ''}${escapeHtml(cand.name)} (${cand.reason})</option>`).join("")}
+                  ${candidates.length ? candidates.map((cand, ci) => `<option value="${escapeHtml(cand.name)}" ${ci === 0 ? "selected" : ""}>${ci === 0 ? '⭐ ' : ''}${escapeHtml(cand.name)} — ${cand.score}% Match</option>`).join("") : `<option value="">No free teacher found</option>`}
                 </select>
               </div>
               <div style="margin-top:8px">
@@ -1928,6 +2059,17 @@ const d = new Date();
 document.getElementById("today").textContent = d.toLocaleDateString("en-IN", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
 const dp = document.getElementById("findDate");
 if(dp) dp.valueAsDate = d;
+</script>
+
+<!-- SERVICE WORKER REGISTRATION (STEP 4) -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(() => console.log('Service Worker Registered Successfully!'))
+        .catch((err) => console.error('Service Worker Registration Failed:', err));
+    });
+  }
 </script>
 </body>
 </html>
